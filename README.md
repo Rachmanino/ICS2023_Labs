@@ -1,5 +1,5 @@
 # ICS2023 Labs
-*My labs in the course ICS2023 of PKU.*
+>My labs in the course ICS2023 of PKU.
 - [x] datalab
 - [x] bomblab
 - [x] attacklab

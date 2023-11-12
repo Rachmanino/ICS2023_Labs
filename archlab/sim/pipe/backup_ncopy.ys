@@ -1,0 +1,80 @@
+#/* $begin ncopy-ys */
+##################################################################
+# ncopy.ys - Copy a src block of len words to dst.
+# Return the number of positive words (>0) contained in src.
+#
+# Include your name and ID here.
+#
+# name: 吴童
+# id: 2200013212
+#
+# Describe how and why you modified the baseline code.
+#
+# 1. I remove ‘xorq %rax,%rax' to save time, since %rax is already 0 at the beginning. 15.10
+# 2. I use the instruction 'iaddq' to replace some of the instructions. 12.62
+# 3. I adjust the order of calculation in Nops part and put the calculation of %rdx to the end, 
+#    so it'll set the CC automatically without the instruction 'andq %rdx, %rdx'. 11.62
+# 4. I take the Loop Unrolling strategy by changing the strcuture of the code.
+#
+##################################################################
+# Do not modify this portion
+# Function prologue.
+# %rdi = src, %rsi = dst, %rdx = len
+ncopy:
+
+##################################################################
+# You can modify this portion
+	# Loop header:
+	andq %rdx,%rdx		# len <= 0?
+	jle Done		# if so, goto Done
+	jmp Test1
+
+Loop1:	
+	mrmovq (%rdi), %r10	# read val from src...
+	rmmovq %r10, (%rsi)	# ...and store it to dst
+	andq %r10, %r10		# val <= 0?
+	jle Loop2			# if so, goto Npos:
+	iaddq $1, %rax		# count++
+
+Loop2:
+    mrmovq 8(%rdi), %r10
+    rmmovq %r10, 8(%rsi)
+    andq %r10, %r10
+    jle Test1
+    iaddq $1, %rax
+
+Test1:
+	iaddq $-2, %rdx
+	jge Loop1
+	iaddq $-8,%rdi
+    iaddq $-8,%rsi
+	iaddq $2, %rdx
+	jmp Test2
+
+Remain:
+	mrmovq (%rdi), %r8
+    rmmovq %r8, (%rsi)
+    andq %r8, %r8
+    jle Test2
+    iaddq $1, %rax
+
+Test2:
+	iaddq $8, %rdi
+    iaddq $8, %rsi
+    iaddq $-1, %rdx
+    jge Remain
+
+Npos:	
+	iaddq $16, %rdi		# src++
+	iaddq $16, %rsi		# dst++
+	iaddq $-2, %rdx		# len--
+	jg Loop1			# if so, goto Loop: 
+##################################################################
+# Do not modify the following section of code
+# Function epilogue.
+Done:
+	ret
+##################################################################
+# Keep the following label at the end of your function
+End:
+#/* $end ncopy-ys */

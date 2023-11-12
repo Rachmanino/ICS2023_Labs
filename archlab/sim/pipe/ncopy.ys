@@ -1,0 +1,268 @@
+#/* $begin ncopy-ys */
+##################################################################
+# ncopy.ys - Copy a src block of len words to dst.
+# Return the number of positive words (>0) contained in src.
+#
+# Include your name and ID here.
+#
+# name: 吴童
+# id: 2200013212
+#
+# Describe how and why you modified the baseline code.
+#
+# 1. I remove ‘xorq %rax,%rax' to save time, since %rax is already 0 at the beginning. 
+# 2. I use the instruction 'iaddq' to replace some of the instructions. 
+# 3. I adjust the order of calculation in Nops part and put the calculation of %rdx to the end, 
+#    so it'll set the CC automatically without the instruction 'andq %rdx, %rdx'. 
+# 4. I take the Loop Unrolling strategy (copy 8 elements per cycle) by changing the strcuture of the code. 
+# 5. I remove the original loop header to run 'jmp Test1' directly. 
+# 6. I modified the code in pipe-full.hcl to make use of the load forwarding technique.
+# 7. I use the binary search to deal with remaining 0~7 elements, 
+#    where the smaller the number of remaining elements is, the more efficient the binary search should be. 
+#
+##################################################################
+# Do not modify this portion
+# Function prologue.
+# %rdi = src, %rsi = dst, %rdx = len
+ncopy:
+
+##################################################################
+# You can modify this portion
+	# Loop header:
+	iaddq $-8, %rdx
+    jl Less8
+
+Loop8_1:	
+	mrmovq (%rdi), %r10	# read val from src...
+	rmmovq %r10, (%rsi)	# ...and store it to dst
+	andq %r10, %r10		# val <= 0?
+	jle Loop8_2    	# if so, goto Loop10-2:
+	iaddq $1, %rax		# count++
+
+Loop8_2:
+    mrmovq 8(%rdi), %r10
+    rmmovq %r10, 8(%rsi)
+    andq %r10, %r10
+    jle Loop8_3
+    iaddq $1, %rax
+
+Loop8_3:
+    mrmovq 16(%rdi), %r10
+    rmmovq %r10, 16(%rsi)
+    andq %r10, %r10
+    jle Loop8_4
+    iaddq $1, %rax
+
+Loop8_4:
+    mrmovq 24(%rdi), %r10
+    rmmovq %r10, 24(%rsi)
+    andq %r10, %r10
+    jle Loop8_5
+    iaddq $1, %rax
+
+Loop8_5:
+	mrmovq 32(%rdi), %r10
+    rmmovq %r10, 32(%rsi)
+    andq %r10, %r10
+    jle Loop8_6
+    iaddq $1, %rax
+
+Loop8_6:
+	mrmovq 40(%rdi), %r10
+    rmmovq %r10, 40(%rsi)
+    andq %r10, %r10
+    jle Loop8_7
+    iaddq $1, %rax
+
+Loop8_7:
+    mrmovq 48(%rdi), %r10
+    rmmovq %r10, 48(%rsi)
+    andq %r10, %r10
+    jle Loop8_8
+    iaddq $1, %rax
+
+Loop8_8:
+    mrmovq 56(%rdi), %r10
+    rmmovq %r10, 56(%rsi)
+    andq %r10, %r10
+    jle Loop8_end
+    iaddq $1, %rax
+
+Loop8_end:
+    iaddq $64, %rdi
+    iaddq $64, %rsi
+    iaddq $-8, %rdx
+    jge Loop8_1
+
+Less8:  # 二分查找0-7
+    iaddq $4, %rdx
+    jl Less4
+    je Remain4
+    iaddq $-2, %rdx
+    jl Remain5
+    je Remain6
+    jmp Remain7
+
+Less4:  # 二分查找0-3
+    iaddq $3,%rdx
+    je Remain1
+    iaddq $-1, %rdx
+    je Remain2
+    jg Remain3
+	jmp Done
+
+Remain7:
+    mrmovq 48(%rdi), %r10
+    rmmovq %r10, 48(%rsi)
+    andq %r10, %r10
+    jle Remain6
+    iaddq $1, %rax
+
+Remain6:
+    mrmovq 40(%rdi), %r10
+    rmmovq %r10, 40(%rsi)
+    andq %r10, %r10
+    jle Remain5
+    iaddq $1, %rax
+
+Remain5: 
+    mrmovq 32(%rdi), %r10
+    rmmovq %r10, 32(%rsi)
+    andq %r10, %r10
+    jle Remain4
+    iaddq $1, %rax
+
+Remain4:
+    mrmovq 24(%rdi), %r10
+    rmmovq %r10, 24(%rsi)
+    andq %r10, %r10
+    jle Remain3
+    iaddq $1, %rax
+
+Remain3:  
+    mrmovq 16(%rdi), %r10
+    rmmovq %r10, 16(%rsi)
+    andq %r10, %r10
+    jle Remain2
+    iaddq $1, %rax
+
+Remain2: 
+    mrmovq 8(%rdi), %r10
+    rmmovq %r10, 8(%rsi)
+    andq %r10, %r10
+    jle Remain1
+    iaddq $1, %rax
+
+Remain1:
+    mrmovq (%rdi), %r10
+    rmmovq %r10, (%rsi)
+    andq %r10, %r10
+    jle Done
+    iaddq $1, %rax
+
+# Loop4_1:
+#     mrmovq (%rdi), %r10
+#     rmmovq %r10, (%rsi)
+#     andq %r10, %r10
+#     jle Loop4_2
+#     iaddq $1, %rax
+
+# Loop4_2:
+#     mrmovq 8(%rdi), %r10
+#     rmmovq %r10, 8(%rsi)
+#     andq %r10, %r10
+#     jle Loop4_3
+#     iaddq $1, %rax
+
+# Loop4_3:
+#     mrmovq 16(%rdi), %r10
+#     rmmovq %r10, 16(%rsi)
+#     andq %r10, %r10
+#     jle Loop4_4
+#     iaddq $1, %rax
+
+# Loop4_4:
+#     mrmovq 24(%rdi), %r10
+#     rmmovq %r10, 24(%rsi)
+#     andq %r10, %r10
+#     jle Loop4_end
+#     iaddq $1, %rax
+
+# Loop4_end:
+#     iaddq $32, %rdi
+# 	iaddq $32, %rsi
+# 	iaddq $-4, %rdx
+
+# Loop3:
+#     iaddq $1,%rdx
+# 	jl Loop2
+
+# Loop3_1:
+#     mrmovq (%rdi), %r10
+#     rmmovq %r10, (%rsi)
+#     andq %r10, %r10
+#     jle Loop3_2
+#     iaddq $1, %rax
+
+# Loop3_2:
+#     mrmovq 8(%rdi), %r10
+#     rmmovq %r10, 8(%rsi)
+#     andq %r10, %r10
+#     jle Loop3_3
+#     iaddq $1, %rax
+
+# Loop3_3:
+#     mrmovq 16(%rdi), %r10
+#     rmmovq %r10, 16(%rsi)
+#     andq %r10, %r10
+#     jle Loop3_end
+#     iaddq $1, %rax
+
+# Loop3_end:
+#     iaddq $24, %rdi
+# 	iaddq $24, %rsi
+# 	iaddq $-3, %rdx
+
+# Loop2:
+#     iaddq $1,%rdx
+# 	jl Loop1
+
+# Loop2_1:
+#     mrmovq (%rdi), %r10
+#     rmmovq %r10, (%rsi)
+#     andq %r10, %r10
+#     jle Loop2_2
+#     iaddq $1, %rax
+
+# Loop2_2:
+#     mrmovq 8(%rdi), %r10
+#     rmmovq %r10, 8(%rsi)
+#     andq %r10, %r10
+#     jle Loop2_end
+#     iaddq $1, %rax
+
+# Loop2_end:
+#     iaddq $16, %rdi
+#     iaddq $16, %rsi
+#     iaddq $-2, %rdx
+
+# Loop1:
+#     iaddq $1, %rdx
+#     je Loop1_1
+#     ret
+
+# Loop1_1:
+# 	mrmovq (%rdi), %r10	# read val from src...
+# 	rmmovq %r10, (%rsi)	# ...and store it to dst
+# 	andq %r10, %r10		# val <= 0?
+# 	jle Done		# if so, goto Npos:
+# 	iaddq $1,%rax 	# count++
+##################################################################
+# Do not modify the following section of code
+# Function epilogue.
+Done:
+	ret
+##################################################################
+# Keep the following label at the end of your function
+End:
+#/* $end ncopy-ys */

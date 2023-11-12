@@ -1,0 +1,58 @@
+# name: 吴童
+# id: 2200013212
+
+# Execution begins at address 0
+        .pos 0
+        irmovq stack,%rsp
+        call main
+        halt
+
+.align 8
+Array:
+        .quad 0xbca
+        .quad 0xcba
+        .quad 0xacb
+        .quad 0xcab
+        .quad 0xabc
+        .quad 0xbac
+
+main:	
+        irmovq Array,%rdi
+        irmovq $6,%rsi
+        jmp bubble_sort
+
+bubble_sort:
+        irmovq  $8, %r10
+        addq    %rsi, %rsi
+        addq    %rsi, %rsi
+        addq    %rsi, %rsi
+        subq    %r10, %rsi
+        addq    %rdi, %rsi
+        jmp     L2
+L3:
+        addq    %r10, %rax
+L5:
+        rrmovq  %rax, %r8
+        subq    %rsi, %r8
+        jge     L7
+        mrmovq  8(%rax), %rdx
+        mrmovq  (%rax), %rcx
+        rrmovq  %rdx, %r8
+        subq    %rcx, %r8
+        jge     L3
+        rmmovq  %rcx, 8(%rax)
+        rmmovq  %rdx, (%rax)
+        jmp     L3
+L7:
+        subq    %r10, %rsi
+L2:
+        rrmovq  %rdi, %r8
+        subq    %rsi, %r8
+        jge     L8
+        rrmovq  %rdi, %rax
+        jmp     L5
+L8:
+        ret
+
+        .pos 0x200
+stack:

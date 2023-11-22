@@ -4,7 +4,7 @@
 - [x] bomblab
 - [x] attacklab
 - [x] archlab
-- [x] cachelab *working...*
-- [ ] tshlab
+- [x] cachelab 
+- [ ] tshlab *working...*
 - [ ] proxylab
 - [ ] malloclab   

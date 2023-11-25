@@ -2,6 +2,11 @@
  * tsh - A tiny shell program with job control
  * 
  * <Put your name and login ID here>
+ * Name: 吴童
+ * Student ID: 2200013212
+ * Comments: 我首先完成了函数eval部分和handlers。为了避免竞争，并谨慎地为子进程恢复了被block的信号槽以及默认handlers。
+ *           在每次访问全局变量前后，我为了避免死锁block了所有信号。
+ *           最后实现builtin commands，我利用自学的重定向知识和进程、进程组与任务之间的对应关系完成了writeup要求。
  */
 #include <assert.h>
 #include <stdio.h>
@@ -17,7 +22,7 @@
 #include <stdarg.h>
 
 /* Misc manifest constants */
-#define MAXLINE    1024   /* max line size */
+#define MAXLINE    8192   /* max line size */
 #define MAXARGS     128   /* max args on a command line */
 #define MAXJOBS      16   /* max jobs at any point in time */
 #define MAXJID    1<<16   /* max job ID */
@@ -199,8 +204,21 @@ main(int argc, char **argv)
 void 
 eval(char *cmdline) 
 {
-    int bg;              /* should the job run in bg or fg? */
+    int bg, state;              /* should the job run in bg or fg? */
+    pid_t pid = 0;
+    struct job_t* job;
     struct cmdline_tokens tok;
+
+    sigset_t mask_all,  // mask of all signals
+        mask_chld,      // mask of SIGCHLD  
+        mask_three,     // mask of SIGCHLD, SIGINT, SIGTSTP accorrding to writeup
+        prev_mask;      // old mask for restoration     
+    sigfillset(&mask_all);
+    sigemptyset(&mask_chld);
+    sigaddset(&mask_chld, SIGCHLD);
+    sigaddset(&mask_three, SIGCHLD);
+    sigaddset(&mask_three, SIGINT);
+    sigaddset(&mask_three, SIGTSTP);
 
     /* Parse command line */
     bg = parseline(cmdline, &tok); 
@@ -210,7 +228,180 @@ eval(char *cmdline)
     if (tok.argv[0] == NULL) /* ignore empty lines */
         return;
 
-    return;
+    state = bg ? BG : FG;  
+
+    switch (tok.builtins) {
+        case BUILTIN_JOBS:  // jobs: List the running and stopped background jobs.
+            int fd = tok.outfile ? open(tok.outfile, O_RDWR|O_CREAT) : STDOUT_FILENO; // support for redirection
+            listjobs(job_list, fd);
+            return;
+        
+        case BUILTIN_BG:    // bg job: Change a stopped background job into a running background job.
+            if (tok.argv[1][0] == '%') { // jid
+                int jid = atoi(tok.argv[1]+1);  // ignore '%’
+                job = getjobjid(job_list, jid);
+            } else {    // pid      
+                int pid = atoi(tok.argv[1]);
+                job = getjobpid(job_list, pid);
+            }
+            sigprocmask(SIG_BLOCK, &mask_three, &prev_mask);
+            if (job->state == ST) {
+                job->state = BG;
+                kill(-(job->pid), SIGCONT); // ! pass SIGCONT to the whole process group(job)
+                printf("[%d] (%d) %s\n", job->jid, job->pid, job->cmdline);
+            }
+            sigprocmask(SIG_SETMASK, &prev_mask, NULL);
+            return;         
+        
+        case BUILTIN_FG:    // fg job: Change a stopped or running background job into a running foreground job.
+            if (tok.argv[1][0] == '%') { // jid
+                int jid = atoi(tok.argv[1]+1);  // ignore '%’
+                job = getjobjid(job_list, jid);
+            } else {    // pid      
+                pid = atoi(tok.argv[1]);
+                job = getjobpid(job_list, pid);
+            }
+            sigprocmask(SIG_BLOCK, &mask_three, &prev_mask);
+            if (job->state == ST || job->state == BG) {
+                if (job->state == ST)
+                    kill(-(job->pid), SIGCONT); // ! pass SIGCONT to the whole process group(job)
+                while (job->pid == fgpid(job_list))  // similar to not-builtin commands
+                    sigsuspend(&prev_mask);
+            }
+            sigprocmask(SIG_SETMASK, &prev_mask, NULL);
+            return;          
+        
+        case BUILTIN_KILL:
+            sigprocmask(SIG_BLOCK, &mask_three, &prev_mask);
+            if (tok.argv[1][0] == '%') { // jid
+                int jid = atoi(tok.argv[1]+1);  // ignore '%’
+                if (jid > 0) {  // kill process
+                    job = getjobjid(job_list, jid);
+                    if (job) {
+                        kill(job->pid, SIGTERM);
+                    } else {
+                        printf("%%%d:No such job\n", jid);
+                    }
+                } else {    // kill process group
+                    job = getjobjid(job_list, -jid);
+                    if (job) {
+                        kill(-(job->pid), SIGTERM);
+                    } else {
+                        printf("%%%d:No such process group\n", -jid);
+                    }
+                } 
+            } else {    // pid      
+                int pid = atoi(tok.argv[1]);
+                if (pid > 0) {  // kill process
+                    job = getjobpid(job_list, pid);
+                    if (job) {
+                        kill(job->pid, SIGTERM);
+                    } else {
+                        printf("(%d):No such process", pid);
+                    }
+                } else {    // kill process group
+                    job = getjobpid(job_list, -pid);
+                    if (job) {
+                        kill(-(job->pid), SIGTERM);
+                    } else {
+                        printf("(%d):No such process group\n", -pid);
+                    }
+                } 
+            }
+            sigprocmask(SIG_SETMASK, &prev_mask, NULL);
+            return;
+
+        case BUILTIN_NOHUP:
+            /* For child process */
+            sigset_t mask_hup;
+            sigemptyset(&mask_hup);
+            sigaddset(&mask_hup, SIGHUP);
+            sigprocmask(SIG_BLOCK, &mask_hup, &prev_mask);
+            sigprocmask(SIG_BLOCK, &mask_three, &prev_mask);
+        
+            if ((pid = fork()) == 0) {
+                /* Restore signal blocks and handlers for child process, but SIGHUP is forever blocked */
+                sigprocmask(SIG_SETMASK, &mask_hup, NULL);
+                Signal(SIGINT,  SIG_DFL); 
+                Signal(SIGTSTP, SIG_DFL);  
+                Signal(SIGCHLD, SIG_DFL);  
+                Signal(SIGQUIT, SIG_DFL);
+                
+                setpgid(0, 0);
+                
+                /* Support for redirections */
+                int fd_in = tok.infile ? open(tok.infile, O_RDONLY) : STDIN_FILENO,
+                    fd_out = tok.outfile ? open(tok.infile, O_RDWR|O_CREAT) : STDOUT_FILENO;
+                dup2(fd_in, STDIN_FILENO);
+                dup2(fd_out, STDOUT_FILENO);
+
+                execve(tok.argv[1], tok.argv + 1, environ);
+            }
+
+            /* For parent process (child process never reaches here) */
+            if (state == FG) {  // foreground
+                sigprocmask(SIG_BLOCK, &mask_all, NULL);    // ! block all signals when accessing global value
+                addjob(job_list, pid, FG, cmdline);  
+                sigprocmask(SIG_SETMASK, &prev_mask, NULL);
+
+                /* Wait for foreground job to terminate */
+                while (pid == fgpid(job_list))  // until child process not in foregrount
+                    sigsuspend(&prev_mask);
+            } else {            // background
+                sigprocmask(SIG_BLOCK, &mask_all, NULL);    // ! block all signals when accessing global value
+                addjob(job_list, pid, BG, cmdline); 
+                sigprocmask(SIG_SETMASK, &prev_mask, NULL);
+                
+                printf("[%d] (%d) %s\n", pid2jid(pid), pid, cmdline); // output background job info
+            }
+            return;
+
+        case BUILTIN_QUIT:  // quit: Leave the tsh.
+            exit(0);
+        
+        default:  // not-builtin commands
+            sigprocmask(SIG_BLOCK, &mask_three, &prev_mask);   // block SIGCHLD to ensure addjob before deletejob
+ 
+            /* For child process */
+            if ((pid = fork()) == 0) {
+                /* Restore signal blocks and handlers for child process */
+                sigprocmask(SIG_SETMASK, &prev_mask, NULL);     
+                Signal(SIGINT,  SIG_DFL); 
+                Signal(SIGTSTP, SIG_DFL);  
+                Signal(SIGCHLD, SIG_DFL);  
+                Signal(SIGQUIT, SIG_DFL);  
+                
+                setpgid(0, 0);
+                
+                /* Support for redirections */
+                int fd_in = tok.infile ? open(tok.infile, O_RDONLY) : STDIN_FILENO,
+                    fd_out = tok.outfile ? open(tok.infile, O_RDWR|O_CREAT) : STDOUT_FILENO;
+                dup2(fd_in, STDIN_FILENO);
+                dup2(fd_out, STDOUT_FILENO);
+
+                execve(tok.argv[0], tok.argv, environ);
+            }
+
+            /* For parent process (child process never reaches here) */
+            if (state == FG) {  // foreground
+                sigprocmask(SIG_BLOCK, &mask_all, NULL);    // ! block all signals when accessing global value
+                addjob(job_list, pid, FG, cmdline);  
+                sigprocmask(SIG_SETMASK, &prev_mask, NULL);
+
+                /* Wait for foreground job to terminate */
+                while (pid == fgpid(job_list))  // until child process not in foregrount
+                    sigsuspend(&prev_mask);
+                // ? 再次阻塞SIGCHLD
+                // sigprocmask(SIG_SETMASK, &mask_three, NULL);
+            } else {            // background
+                sigprocmask(SIG_BLOCK, &mask_all, NULL);    // ! block all signals when accessing global value
+                addjob(job_list, pid, BG, cmdline); 
+                sigprocmask(SIG_SETMASK, &prev_mask, NULL);
+                
+                printf("[%d] (%d) %s\n", pid2jid(pid), pid, cmdline); // output background job info
+            }
+            return; 
+    }
 }
 
 /* 
@@ -380,6 +571,41 @@ parseline(const char *cmdline, struct cmdline_tokens *tok)
 void 
 sigchld_handler(int sig) 
 {
+    int status;
+    int old_error = errno;
+    pid_t pid;
+    sigset_t mask_all, prev_mask;
+    sigfillset(&mask_all);
+
+    //while ((pid = waitpid(-1, &status, WNOHANG | WUNTRACED)) > 0) {
+    while ((pid = waitpid(-1, &status, WNOHANG | WUNTRACED | WCONTINUED)) > 0) {
+        if (WIFEXITED(status)) {    // end normally
+            sigprocmask(SIG_BLOCK, &mask_all, &prev_mask);  // ! block all signals when accessing global value
+            deletejob(job_list, pid);
+            sigprocmask(SIG_SETMASK, &prev_mask, NULL);
+        }
+        if (WIFSIGNALED(status)) {
+            printf("Job [%d] (%d) terminated by signal %d\n", pid2jid(pid), pid, WTERMSIG(status));
+            sigprocmask(SIG_BLOCK, &mask_all, &prev_mask);  // ! block all signals when accessing global value
+            deletejob(job_list, pid);
+            sigprocmask(SIG_SETMASK, &prev_mask, NULL);
+        }
+        if (WIFSTOPPED(status)) {
+            printf("Job [%d] (%d) stopped by signal %d\n", pid2jid(pid), pid, WSTOPSIG(status));
+            sigprocmask(SIG_BLOCK, &mask_all, &prev_mask);  // ! block all signals when accessing global value
+            struct job_t* job = getjobpid(job_list, pid);
+            job->state = ST;
+            sigprocmask(SIG_SETMASK, &prev_mask, NULL);
+        }
+        if (WIFCONTINUED(status)) {
+            sigprocmask(SIG_BLOCK, &mask_all, &prev_mask);  // ! block all signals when accessing global value
+            struct job_t* job = getjobpid(job_list, pid);
+            job->state = BG;
+            sigprocmask(SIG_SETMASK, &prev_mask, NULL);
+        }
+    }
+
+    errno = old_error;
     return;
 }
 
@@ -389,8 +615,20 @@ sigchld_handler(int sig)
  *    to the foreground job.  
  */
 void 
-sigint_handler(int sig) 
+sigint_handler(int sig) // forward command kill from tsh to child process
 {
+    int old_error = errno;
+    pid_t pid;
+    sigset_t mask_all, prev_mask;
+    sigfillset(&mask_all);
+
+    sigprocmask(SIG_BLOCK, &mask_all, &prev_mask);  // ! block all signals when accessing global value
+    pid = fgpid(job_list);
+    sigprocmask(SIG_SETMASK, &prev_mask, NULL);
+
+    if (pid)    // if foregrount job exist
+        kill(-pid, SIGINT);     // kill the whole process group
+    errno = old_error;
     return;
 }
 
@@ -402,6 +640,18 @@ sigint_handler(int sig)
 void 
 sigtstp_handler(int sig) 
 {
+    int old_error = errno;
+    pid_t pid;
+    sigset_t mask_all, prev_mask;
+    sigfillset(&mask_all);
+
+    sigprocmask(SIG_BLOCK, &mask_all, &prev_mask);  // ! block all signals when accessing global value
+    pid = fgpid(job_list);
+    sigprocmask(SIG_SETMASK, &prev_mask, NULL);
+
+    if (pid)    // if foregrount job exist
+        kill(-pid, SIGTSTP);     // ! warn that pass SIGTSTP rather than SIGSTOP
+    errno = old_error;
     return;
 }
 

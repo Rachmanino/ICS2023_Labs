@@ -5,6 +5,6 @@
 - [x] attacklab
 - [x] archlab
 - [x] cachelab 
-- [ ] tshlab *working...*
+- [x] tshlab 
 - [ ] proxylab
 - [ ] malloclab   

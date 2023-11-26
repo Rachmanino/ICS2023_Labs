@@ -585,13 +585,13 @@ sigchld_handler(int sig)
             sigprocmask(SIG_SETMASK, &prev_mask, NULL);
         }
         if (WIFSIGNALED(status)) {
-            printf("Job [%d] (%d) terminated by signal %d\n", pid2jid(pid), pid, WTERMSIG(status));
+            sio_put("Job [%d] (%d) terminated by signal %d\n", pid2jid(pid), pid, WTERMSIG(status));
             sigprocmask(SIG_BLOCK, &mask_all, &prev_mask);  // ! block all signals when accessing global value
             deletejob(job_list, pid);
             sigprocmask(SIG_SETMASK, &prev_mask, NULL);
         }
         if (WIFSTOPPED(status)) {
-            printf("Job [%d] (%d) stopped by signal %d\n", pid2jid(pid), pid, WSTOPSIG(status));
+            sio_put("Job [%d] (%d) stopped by signal %d\n", pid2jid(pid), pid, WSTOPSIG(status));
             sigprocmask(SIG_BLOCK, &mask_all, &prev_mask);  // ! block all signals when accessing global value
             struct job_t* job = getjobpid(job_list, pid);
             job->state = ST;
@@ -1044,4 +1044,3 @@ handler_t
         unix_error("Signal error");
     return (old_action.sa_handler);
 }
-

@@ -10,7 +10,7 @@
                 "UNICODE",
                 "_UNICODE"
             ],
-            "cStandard": "c17"
+            "cStandard": "gnu11"
         }
     ],
     "version": 4

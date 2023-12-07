@@ -176,8 +176,8 @@ void *realloc(void *ptr, size_t size)
     mm_free(ptr);
 
     return newptr;
+    
 }
-
 /* 
  * mm_checkheap - Check the heap for correctness. Helpful hint: You
  *                can call this function using mm_checkheap(__LINE__);

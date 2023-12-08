@@ -53,7 +53,7 @@
 /* Basic constants and macros */
 #define WSIZE       4       /* Word and header/footer size (bytes) */ 
 #define DSIZE       8       /* Double word size (bytes) */
-#define CHUNKSIZE  (1<<12)  /* Extend heap by this amount (bytes) */  
+#define CHUNKSIZE   1024    /* Extend heap by this amount (bytes) */  
 
 #define MAX(x, y) ((x) > (y)? (x) : (y))  
 
@@ -80,7 +80,8 @@
 
 /* ################################ 以下为我需要的全局变量，函数和宏 #################################*/
 /* Global variables */
-static void *heap_listp = 0;  /* Pointer to heap start */
+static void *heap_listp = 0;  /* Pointer to prologue block */
+static void *heap_start = 0;  /* Pointer to heap start */
 
 /* Function prototypes for internal helper routines */
 static void *extend_heap(size_t words); 
@@ -91,11 +92,11 @@ static void *coalesce(void *bp);    // 合并空闲块
 static int search(size_t asize); // 找到待分配空间大小对应的空闲链表，返回其下标
 static void insert(void* bp); // 插入到对应的空闲链表中
 static void delete(void* bp); // 从对应的空闲链表中删除
-
+static void print_free_list(char* __FUNCNAME__);
 
 /* Macros for getting and setting the link of a free block */
 #define CLASS_NUM   9   // 空闲链表类数量
-#define GET_LINK_FIRST(index) (char *)(long)(GET((char*)heap_listp + index * WSIZE))  // 获取第index个空闲链表的头指针 index: 0~CLASS_NUM-1
+#define GET_LINK_FIRST(index) (char *)(long)(GET(heap_start + index * WSIZE))  // 获取第index个空闲链表的头指针 index: 0~CLASS_NUM-1
 #define GET_LINK_PRE(bp) (char *)(long)GET((char *)bp)            // 获取bp指向的空闲块的前驱指针
 #define GET_LINK_SUC(bp) (char *) (long)GET((char *)bp + WSIZE)    // 获取bp指向的空闲块的后继指针
 /* ############################################################################################*/
@@ -107,7 +108,8 @@ int mm_init(void) {
     /* Create the initial empty heap for headptrs and prologue block */
     if ((heap_listp = mem_sbrk( (CLASS_NUM + 3) * WSIZE)) == (void *)-1) 
         return -1;
-    
+    else 
+        heap_start = heap_listp;
     /* 初始化链表的head ptr */
     for(int i = 0; i < CLASS_NUM; i++) {
         PUT(heap_listp + i*WSIZE, NULL);
@@ -118,6 +120,7 @@ int mm_init(void) {
     PUT(heap_listp + (CLASS_NUM*WSIZE), PACK(DSIZE, 1));             /* Prologue header */ 
     PUT(heap_listp + ((CLASS_NUM+1)*WSIZE), PACK(DSIZE, 1)); /* Prologue footer */ 
     PUT(heap_listp + ((CLASS_NUM+2)*WSIZE), PACK(0, 1));     /* Epilogue header */
+    heap_listp += ((CLASS_NUM+1)*WSIZE);
 
     /* Extend the empty heap with a free block of CHUNKSIZE bytes */
     if (extend_heap(CHUNKSIZE/WSIZE) == NULL) 
@@ -129,6 +132,10 @@ int mm_init(void) {
  * malloc
  */
 void *malloc (size_t size) {
+#ifdef DEBUG
+    printf("malloc: %lu\n", size);
+    print_free_list("malloc");
+#endif
     size_t asize; /* Adjusted block size */
     size_t extendsize; /* Amount to extend heap if no fit */
     char *bp;      
@@ -300,10 +307,17 @@ void *place(void *bp, size_t asize) {
     }
 }
 void *find_fit(size_t asize) {
+    /* 从小到大遍历空闲链表 */
     for (int i = search(asize); i < CLASS_NUM; i++) {
+        # ifdef DEBUG
+        printf("find_fit: %d\n", i);
+        # endif
         char* cur = GET_LINK_FIRST(i);
         while (cur != NULL) {
             if (GET_SIZE(HDRP(cur)) >= asize) {
+                # ifdef DEBUG
+                printf("find_fit in: %d\n", GET_SIZE(HDRP(cur)));
+                # endif
                 return cur;
             }
             cur = GET_LINK_SUC(cur);
@@ -435,3 +449,17 @@ void delete (void* bp) {
     }
 }
 
+static void print_free_list(char* __FUNCNAME__)
+{   
+    printf("-------------------------------print_free_list-------------------------------\n");
+    for (int i = 0; i < CLASS_NUM; i++) {
+        printf("class %d: ", i);
+        char* cur = GET_LINK_FIRST(i);
+        while (cur != NULL) {
+            printf("%d ", GET_SIZE(HDRP(cur)));
+            cur = GET_LINK_SUC(cur);
+        }
+        printf("\n");
+    }
+    printf("\n--------------------------------------------------------------------------\n");
+}

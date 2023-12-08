@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "*.o": "code-text-binary",
+        "*.hcl": "hcl",
+        "type_traits": "c"
+    }
+}

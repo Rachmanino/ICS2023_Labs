@@ -4,7 +4,7 @@
  * Name: 吴童
  * Student ID: 2200013212
  * 
- * Description: 我采用segregated fit + first fit策略实现。维护9个链表存储块大小：
+ * Description: 我采用segregated fit + first fit + 地址排序 策略实现。维护9个链表存储块大小：
  * [1<<4, 1<<5]
  * (1<<5, 1<<6]
  * (1<<6, 1<<7]
@@ -62,7 +62,7 @@
 
 /* Read and write a word at address p */
 #define GET(p)       (*(unsigned int *)(p))            
-#define PUT(p, val)  (*(unsigned int *)(p) = (val))    
+#define PUT(p, val)  (*(unsigned int *)(p) = (unsigned int)(long)(val))    
 
 /* Read the size and allocated fields from address p */
 #define GET_SIZE(p)  (GET(p) & ~0x7)                   
@@ -75,26 +75,29 @@
 /* Given block ptr bp, compute address of next and previous blocks */
 #define NEXT_BLKP(bp)  ((char *)(bp) + GET_SIZE(((char *)(bp) - WSIZE))) 
 #define PREV_BLKP(bp)  ((char *)(bp) - GET_SIZE(((char *)(bp) - DSIZE))) 
-
-/* 空闲链表类数量*/
-#define CLASS_NUM   9
-#define LINK_FIRST(index) (unsigned int *)(GET(heap_listp + index * WSIZE))  //!#define GET_HEAD(num) ((unsigned int *)(long)(GET(heap_list + WSIZE * num)))
 /* ############################################################################################*/
 
 
-/* ################################ 以下为我需要的全局变量和函数 #################################*/
+/* ################################ 以下为我需要的全局变量，函数和宏 #################################*/
 /* Global variables */
-static char *heap_listp = 0;  /* Pointer to first block */  
+static void *heap_listp = 0;  /* Pointer to heap start */
 
 /* Function prototypes for internal helper routines */
 static void *extend_heap(size_t words); 
-static void place(void *bp, size_t asize);  
+static void *place(void *bp, size_t asize);  
 static void *find_fit(size_t asize);
 static void *coalesce(void *bp);    // 合并空闲块
 
 static int search(size_t asize); // 找到待分配空间大小对应的空闲链表，返回其下标
-static void insert2first(void* bp); // 插入到对应的空闲链表中
+static void insert(void* bp); // 插入到对应的空闲链表中
+static void delete(void* bp); // 从对应的空闲链表中删除
 
+
+/* Macros for getting and setting the link of a free block */
+#define CLASS_NUM   9   // 空闲链表类数量
+#define GET_LINK_FIRST(index) (char *)(long)(GET((char*)heap_listp + index * WSIZE))  // 获取第index个空闲链表的头指针 index: 0~CLASS_NUM-1
+#define GET_LINK_PRE(bp) (char *)(long)GET((char *)bp)            // 获取bp指向的空闲块的前驱指针
+#define GET_LINK_SUC(bp) (char *) (long)GET((char *)bp + WSIZE)    // 获取bp指向的空闲块的后继指针
 /* ############################################################################################*/
 
 /*
@@ -112,10 +115,9 @@ int mm_init(void) {
 
     /* 初始化空闲列表的prologue block */
     //! CLASS_NUM是奇数，所以不用额外考虑对齐问题
-    PUT(heap_listp, PACK(DSIZE, 1));             /* Prologue header */ 
-    PUT(heap_listp + (1*WSIZE), PACK(DSIZE, 1)); /* Prologue footer */ 
-    PUT(heap_listp + (2*WSIZE), PACK(0, 1));     /* Epilogue header */
-    heap_listp += WSIZE;  
+    PUT(heap_listp + (CLASS_NUM*WSIZE), PACK(DSIZE, 1));             /* Prologue header */ 
+    PUT(heap_listp + ((CLASS_NUM+1)*WSIZE), PACK(DSIZE, 1)); /* Prologue footer */ 
+    PUT(heap_listp + ((CLASS_NUM+2)*WSIZE), PACK(0, 1));     /* Epilogue header */
 
     /* Extend the empty heap with a free block of CHUNKSIZE bytes */
     if (extend_heap(CHUNKSIZE/WSIZE) == NULL) 
@@ -127,8 +129,34 @@ int mm_init(void) {
  * malloc
  */
 void *malloc (size_t size) {
-    return NULL;
-    //TODO: Implement this malloc function.
+    size_t asize; /* Adjusted block size */
+    size_t extendsize; /* Amount to extend heap if no fit */
+    char *bp;      
+
+    if (heap_listp == 0){
+        mm_init();
+    }
+    /* Ignore spurious requests */
+    if (size == 0)
+        return NULL;
+
+    /* Adjust block size to include overhead and alignment reqs. */
+    if (size <= DSIZE)                                          
+        asize = 2*DSIZE;                                        
+    else
+        asize = DSIZE * ((size + (DSIZE) + (DSIZE-1)) / DSIZE); 
+
+    /* Search the free list for a fit */
+    if ((bp = find_fit(asize)) != NULL) {  
+        return place(bp, asize);                 
+    }
+
+    /* No fit found. Get more memory and place the block */
+    extendsize = MAX(asize, CHUNKSIZE);                 
+    if ((bp = extend_heap(extendsize/WSIZE)) == NULL)  
+        return NULL;                                  
+    
+    return place(bp, asize);                                 
 }
 
 /*
@@ -246,15 +274,82 @@ static void *extend_heap(size_t words)
     return coalesce(bp);                                          
 }
 
-void place(void *bp, size_t asize) {
+void *place(void *bp, size_t asize) {
+    size_t block_size = GET_SIZE(HDRP(bp)),
+        rest_size = block_size - asize;   
 
+    if(GET_ALLOC(HDRP(bp)) == 0) {
+        delete(bp);
+    }
+
+    /* 不能分割 */
+    if (rest_size < 2*DSIZE) { 
+        PUT(HDRP(bp), PACK(block_size, 1));
+        PUT(FTRP(bp), PACK(block_size, 1));
+        return bp;
+    }
+
+    /* 可以分割 */
+    else { 
+        PUT(HDRP(bp), PACK(asize, 1));
+        PUT(FTRP(bp), PACK(asize, 1));
+        PUT(HDRP(NEXT_BLKP(bp)), PACK(rest_size, 0));
+        PUT(FTRP(NEXT_BLKP(bp)), PACK(rest_size, 0));
+        coalesce(NEXT_BLKP(bp));
+        return bp;
+    }
 }
 void *find_fit(size_t asize) {
-
+    for (int i = search(asize); i < CLASS_NUM; i++) {
+        char* cur = GET_LINK_FIRST(i);
+        while (cur != NULL) {
+            if (GET_SIZE(HDRP(cur)) >= asize) {
+                return cur;
+            }
+            cur = GET_LINK_SUC(cur);
+        }
+    }
+    return NULL;
 }
 
+/* 合并块，要考虑前后块的空闲情况 */
 void *coalesce(void *bp) {
+    unsigned int prev_alloc = GET_ALLOC(FTRP(PREV_BLKP(bp))),
+        next_alloc = GET_ALLOC(HDRP(NEXT_BLKP(bp)));
 
+    if (prev_alloc && next_alloc) {            /* 不合并*/
+        insert(bp);
+        return bp;
+    }
+
+    else if (prev_alloc && !next_alloc) {      /* 只合并后面 */
+        delete(NEXT_BLKP(bp));
+        size_t size = GET_SIZE(HDRP(bp)) + GET_SIZE(HDRP(NEXT_BLKP(bp)));
+        PUT(HDRP(bp), PACK(size, 0));
+        PUT(FTRP(NEXT_BLKP(bp)), PACK(size,0));
+        insert(bp);
+        return bp;
+    }
+
+    else if (!prev_alloc && next_alloc) {      /* 只合并前面 */
+        delete(PREV_BLKP(bp));
+        size_t size = GET_SIZE(HDRP(bp)) + GET_SIZE(HDRP(PREV_BLKP(bp)));
+        PUT(FTRP(bp), PACK(size, 0));
+        PUT(HDRP(PREV_BLKP(bp)), PACK(size,0));
+        insert(PREV_BLKP(bp));
+        return PREV_BLKP(bp);
+    }
+
+    else {                                     /* 合并前后 */
+        delete(PREV_BLKP(bp));
+        delete(NEXT_BLKP(bp));
+        size_t size = GET_SIZE(HDRP(bp)) + GET_SIZE(HDRP(PREV_BLKP(bp))) + 
+            GET_SIZE(HDRP(NEXT_BLKP(bp)));
+        PUT(HDRP(PREV_BLKP(bp)), PACK(size, 0));
+        PUT(FTRP(NEXT_BLKP(bp)), PACK(size, 0));
+        insert(PREV_BLKP(bp));
+        return PREV_BLKP(bp);
+    }
 } 
 
 /* 找到待分配空间大小对应的空闲链表，返回其下标 */
@@ -282,24 +377,61 @@ int search(size_t asize) {
  * (1<<13...
  */
 
-/* 将位于bp的空闲块插入到对应大小类链表表头 */
-void insert2first(void* bp) {
+/* 将位于bp的空闲块插入到对应大小类链表 */
+void insert(void* bp) {
     size_t size = GET_SIZE(HDRP(bp));
     int index = search(size);
-    unsigned int* first = LINK_FIRST(index);
+    char* first = GET_LINK_FIRST(index);
+
+    /* 该空闲块插入到空链表 */
     if (first == NULL) {
-        PUT(first, (unsigned int *)bp);  // bp is head now
-        PUT(bp, NULL);                  // presessor is NULL
-        PUT(bp + WSIZE, NULL);          // successor is NULL
-    } else {    
-        PUT(first, (unsigned int *)bp);
-        PUT(bp, NULL);                         // bp is head now
-        PUT(bp + WSIZE, first);                  //  is NULL
-        PUT(heap_listp + WSIZE * index, bp);
+        PUT(bp, NULL);
+        PUT(bp + WSIZE, NULL);
+        PUT(heap_listp + index * WSIZE, bp);
+        return;
     }
+
+    /* 该空闲块插入到链表中间 */
+    char* cur = first;
+    while (GET_LINK_SUC(cur) != NULL) {
+        char* next = GET_LINK_SUC(cur);
+        if (size <= GET_SIZE(HDRP(next))) {
+            /* 该空闲块插入cur和next之间 */
+            PUT(cur + WSIZE, bp);
+            PUT(bp, cur);
+            PUT(bp + WSIZE, next);
+            PUT(next, bp);
+            return;
+        }
+        cur = next;
+    }
+
+    /* 该空闲块插入空链表末尾 */
+    PUT(cur + WSIZE, bp);
+    PUT(bp, cur);
+    PUT(bp + WSIZE, NULL);
 }
 
 /* 将位于bp的空闲块从对应大小类链表中删除 */
 void delete (void* bp) {
-    
+    /* 该空闲块位于链表中间 */
+    if (GET_LINK_PRE(bp) != NULL && GET_LINK_SUC(bp) != NULL) {
+        PUT(GET_LINK_PRE(bp) + WSIZE, GET_LINK_SUC(bp));
+        PUT(GET_LINK_SUC(bp), GET_LINK_PRE(bp));
+    }
+    /* 该空闲块位于链表头部 */
+    else if (GET_LINK_PRE(bp) == NULL && GET_LINK_SUC(bp) != NULL) {
+        PUT(heap_listp + search(GET_SIZE(HDRP(bp))) * WSIZE, GET_LINK_SUC(bp));
+        PUT(GET_LINK_SUC(bp), NULL);
+    }
+    /* 该空闲块位于链表尾部 */
+    else if (GET_LINK_PRE(bp) != NULL && GET_LINK_SUC(bp) == NULL) {
+        PUT(GET_LINK_PRE(bp) + WSIZE, NULL);
+        PUT(GET_LINK_PRE(bp), NULL);
+    }
+    /* 该空闲块是链表中唯一一个 */
+    else {
+        PUT(heap_listp + search(GET_SIZE(HDRP(bp))) * WSIZE, NULL);
+    }
 }
+

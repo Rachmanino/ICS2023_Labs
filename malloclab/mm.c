@@ -26,7 +26,7 @@
 
 /* If you want debugging output, use the following macro.  When you hand
  * in, remove the #define DEBUG line. */
-#define DEBUG
+//#define DEBUG
 #ifdef DEBUG
 #define dbg_printf(...) printf(__VA_ARGS__)
 #else
@@ -52,7 +52,7 @@
 /* Basic constants and macros */
 #define WSIZE 4             /* Word and header/footer size (bytes) */
 #define DSIZE 8             /* Double word size (bytes) */
-#define CHUNKSIZE 4096      /* Extend heap by this amount (bytes) */
+#define CHUNKSIZE 8192      /* Extend heap by this amount (bytes) */
 
 #define MAX(x, y) ((x) > (y) ? (x) : (y))
 #define MIN(x, y) ((x) > (y) ? (y) : (x))
@@ -179,12 +179,13 @@ void *malloc(size_t size)
  */
 void free(void *ptr)
 {
+    if (ptr == NULL)
+        return;
+
 #ifdef DEBUG
     printf("free %llx: %llx\n", ptr, GET_SIZE(HDRP(ptr)));
     print_free_list("free");
 #endif
-    if (ptr == heap_start)
-        return;
 
     size_t size = GET_SIZE(HDRP(ptr));
 

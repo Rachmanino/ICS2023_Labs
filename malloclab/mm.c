@@ -52,7 +52,7 @@
 /* Basic constants and macros */
 #define WSIZE 4             /* Word and header/footer size (bytes) */
 #define DSIZE 8             /* Double word size (bytes) */
-#define CHUNKSIZE 512       /* Extend heap by this amount (bytes) */
+#define CHUNKSIZE 4096      /* Extend heap by this amount (bytes) */
 
 #define MAX(x, y) ((x) > (y) ? (x) : (y))
 #define MIN(x, y) ((x) > (y) ? (y) : (x))
@@ -160,7 +160,9 @@ void *malloc(size_t size)
     /* Search the free list for a fit */
     if ((bp = find_fit(asize)) != NULL)
     {
+    # ifdef DEBUG
         printf("find fit at %llx\n", bp);
+    # endif
         return place(bp, asize);
     }
 
@@ -177,14 +179,14 @@ void *malloc(size_t size)
  */
 void free(void *ptr)
 {
-    if (ptr == 0)
+#ifdef DEBUG
+    printf("free %llx: %llx\n", ptr, GET_SIZE(HDRP(ptr)));
+    print_free_list("free");
+#endif
+    if (ptr == heap_start)
         return;
 
     size_t size = GET_SIZE(HDRP(ptr));
-    if (heap_listp == 0)
-    {
-        mm_init();
-    }
 
     PUT(HDRP(ptr), PACK(size, 0));
     PUT(FTRP(ptr), PACK(size, 0));
@@ -251,7 +253,7 @@ static int aligned(const void *p)
  */
 void mm_checkheap(int lineno)
 {
-    lineno = lineno;
+    
 }
 
 
@@ -300,14 +302,17 @@ void *place(void *bp, size_t asize)
     /* 可以分割 */
     else
     {
-        printf("seperate %d, rest %d\n", block_size, rest_size);
         PUT(HDRP(bp), PACK(asize, 1));
         PUT(FTRP(bp), PACK(asize, 1));
         PUT(HDRP(NEXT_BLKP(bp)), PACK(rest_size, 0));
         PUT(FTRP(NEXT_BLKP(bp)), PACK(rest_size, 0));
+    #ifdef DEBUG
+        printf("seperate %d, rest %d\n", asize, rest_size);
+        printf("%llx: %llx~%llx %lld\n", bp, HDRP(bp), FTRP(bp)+4, GET_SIZE(HDRP(bp)));
+        printf("%llx: %llx~%llx %lld\n", NEXT_BLKP(bp), HDRP(NEXT_BLKP(bp)), FTRP(NEXT_BLKP(bp))+4, GET_SIZE(HDRP(NEXT_BLKP(bp))));
+    #endif    
         coalesce(NEXT_BLKP(bp));
         return bp;
-        printf("bp = %llx, next = %llx\n", bp, NEXT_BLKP(bp));
     }
 }
 void *find_fit(size_t asize)
@@ -316,7 +321,7 @@ void *find_fit(size_t asize)
     for (int i = search(asize); i < CLASS_NUM; i++)
     {
 #ifdef DEBUG
-        // printf("find_fit: %d\n", i);
+        printf("find_fit: %d\n", i);
 #endif
         char *cur = GET_LINK_FIRST(i);
         while (cur != heap_start)
@@ -348,7 +353,8 @@ void *coalesce(void *bp)
         delete (NEXT_BLKP(bp));
         size_t size = GET_SIZE(HDRP(bp)) + GET_SIZE(HDRP(NEXT_BLKP(bp)));
         PUT(HDRP(bp), PACK(size, 0));
-        PUT(FTRP(NEXT_BLKP(bp)), PACK(size, 0));
+        PUT(FTRP(bp), PACK(size, 0));
+        // printf("FTRP(NEXT_BLKP(bp) is %llx, size is %d", FTRP(NEXT_BLKP(bp)), size);
         insert(bp);
         return bp;
     }
@@ -356,6 +362,12 @@ void *coalesce(void *bp)
     else if (!prev_alloc && next_alloc)
     { /* 只合并前面 */
         delete (PREV_BLKP(bp));
+    #ifdef DEBUG
+        printf("前面合并\n");
+        printf("bp: %llx\n", bp);
+        printf("删除%llx后\n", PREV_BLKP(bp));
+        print_free_list("coalesce");
+    #endif
         size_t size = GET_SIZE(HDRP(bp)) + GET_SIZE(HDRP(PREV_BLKP(bp)));
         PUT(FTRP(bp), PACK(size, 0));
         PUT(HDRP(PREV_BLKP(bp)), PACK(size, 0));
@@ -365,12 +377,17 @@ void *coalesce(void *bp)
 
     else
     { /* 合并前后 */
+    #ifdef DEBUG
+        printf("前后合并\n");
+    #endif
         delete (PREV_BLKP(bp));
         delete (NEXT_BLKP(bp));
         size_t size = GET_SIZE(HDRP(bp)) + GET_SIZE(HDRP(PREV_BLKP(bp))) +
                       GET_SIZE(HDRP(NEXT_BLKP(bp)));
         PUT(HDRP(PREV_BLKP(bp)), PACK(size, 0));
         PUT(FTRP(NEXT_BLKP(bp)), PACK(size, 0));
+        PUT(PREV_BLKP(bp), NULL);
+        PUT(PREV_BLKP(bp) + WSIZE, NULL);
         insert(PREV_BLKP(bp));
         return PREV_BLKP(bp);
     }
@@ -488,7 +505,7 @@ static void print_free_list(char *__FUNCNAME__)
         char *cur = GET_LINK_FIRST(i);
         while (cur != heap_start)
         {
-            printf("  0x%llx~0x%llx: %d \n", cur, cur+GET_SIZE(HDRP(cur)), GET_SIZE(HDRP(cur)));
+            printf("  0x%llx~0x%llx: %d=%d, pre:%llx, suc:%llx\n", HDRP(cur), FTRP(cur)+WSIZE, GET_SIZE(HDRP(cur)), GET_SIZE(FTRP(cur)), GET_LINK_PRED(cur), GET_LINK_SUCC(cur));
             cur = GET_LINK_SUCC(cur);
         }
     }

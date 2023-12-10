@@ -26,7 +26,7 @@
 
 /* If you want debugging output, use the following macro.  When you hand
  * in, remove the #define DEBUG line. */
-//#define DEBUG
+// #define DEBUG
 #ifdef DEBUG
 #define dbg_printf(...) printf(__VA_ARGS__)
 #else
@@ -50,9 +50,9 @@
 
 /* ###################################### 以下为我需要的宏 ######################################*/
 /* Basic constants and macros */
-#define WSIZE 4             /* Word and header/footer size (bytes) */
-#define DSIZE 8             /* Double word size (bytes) */
-#define CHUNKSIZE 8192      /* Extend heap by this amount (bytes) */
+#define WSIZE 4        /* Word and header/footer size (bytes) */
+#define DSIZE 8        /* Double word size (bytes) */
+#define CHUNKSIZE 8192 /* Extend heap by this amount (bytes) */
 
 #define MAX(x, y) ((x) > (y) ? (x) : (y))
 #define MIN(x, y) ((x) > (y) ? (y) : (x))
@@ -79,8 +79,7 @@
 
 /* ################################ 以下为我需要的全局变量，函数和宏 #################################*/
 /* Global variables */
-static void *heap_listp = 0; /* Pointer to prologue block */
-static void *heap_start = 0; /* Pointer to heap start */
+static void *heap_listp = 0; /* Pointer to heap entry */
 
 /* Function prototypes for internal helper routines */
 static void *extend_heap(size_t words);
@@ -94,10 +93,10 @@ static void delete(void *bp);    // 从对应的空闲链表中删除
 static void print_free_list(char *__FUNCNAME__);
 
 /* Extra macros */
-#define CLASS_NUM 9                                                                  // 空闲链表类数量
-#define GET_LINK_FIRST(index) (heap_start + (long)(GET(heap_start + index * WSIZE))) // 获取第index个空闲链表的头指针 index: 0~CLASS_NUM-1
-#define GET_LINK_PRED(bp) (heap_start + (GET((char *)(bp))))                             // 获取位于bp的空闲块的链表前驱指针
-#define GET_LINK_SUCC(bp) (heap_start + (GET((char *)(bp) + WSIZE)))                                        // 获取位于bp的空闲块的链表后继指针
+#define CLASS_NUM 11                                                                  // 空闲链表类数量
+#define GET_LINK_FIRST(index) (heap_listp + (long)(GET(heap_listp + index * WSIZE))) // 获取第index个空闲链表的头指针 index: 0~CLASS_NUM-1
+#define GET_LINK_PRED(bp) (heap_listp + (GET((char *)(bp))))                         // 获取位于bp的空闲块的链表前驱指针
+#define GET_LINK_SUCC(bp) (heap_listp + (GET((char *)(bp) + WSIZE)))                 // 获取位于bp的空闲块的链表后继指针
 /* ############################################################################################*/
 
 /*
@@ -121,8 +120,6 @@ int mm_init(void)
     PUT(heap_listp + ((CLASS_NUM + 1) * WSIZE), PACK(DSIZE, 1)); /* Prologue footer */
     PUT(heap_listp + ((CLASS_NUM + 2) * WSIZE), PACK(0, 1));     /* Epilogue header */
 
-    heap_start = heap_listp;
-    heap_listp += ((CLASS_NUM + 1) * WSIZE);
 
     /* Extend the empty heap with a free block of CHUNKSIZE bytes */
     if (extend_heap(CHUNKSIZE / WSIZE) == NULL)
@@ -160,9 +157,9 @@ void *malloc(size_t size)
     /* Search the free list for a fit */
     if ((bp = find_fit(asize)) != NULL)
     {
-    # ifdef DEBUG
+#ifdef DEBUG
         printf("find fit at %llx\n", bp);
-    # endif
+#endif
         return place(bp, asize);
     }
 
@@ -199,35 +196,43 @@ void free(void *ptr)
  */
 void *realloc(void *oldptr, size_t size)
 {
-    size_t oldsize;
+    size_t oldsize, 
+        asize, 
+        nextsize;
     void *newptr;
 
     /* If size == 0 then this is just free, and we return NULL. */
-    if(size == 0) {
+    if (size == 0){
         free(oldptr);
         return 0;
     }
 
     /* If oldptr is NULL, then this is just malloc. */
-    if(oldptr == NULL) {
+    if (oldptr == NULL) {
         return malloc(size);
     }
 
-    newptr = malloc(size);
-
-    /* If realloc() fails the original block is left untouched  */
-    if(!newptr) {
-        return 0;
-    }
-
-    /* Copy the old data. */
     oldsize = GET_SIZE(HDRP(oldptr));
-    if(size < oldsize) oldsize = size;
-    memcpy(newptr, oldptr, oldsize);
+    nextsize = GET_SIZE(HDRP(NEXT_BLKP(oldptr)));
+    if (size <= DSIZE)
+        asize = 2 * DSIZE;
+    else
+        asize = DSIZE * ((size + (DSIZE) + (DSIZE - 1)) / DSIZE);
 
-    /* Free the old block. */
+    if (nextsize == 0 && oldsize < asize) {
+        if((long)(mem_sbrk(asize - oldsize)) == -1)
+            return NULL; 
+        PUT(HDRP(oldptr), PACK(asize, 1));
+        PUT(FTRP(oldptr), PACK(asize, 1));
+        PUT(HDRP(NEXT_BLKP(oldptr)), PACK(0, 1)); 
+        place(oldptr, asize);
+        return oldptr;
+    }
+    
+    /* Final solution... */
+    newptr = malloc(size);
+    memcpy(newptr, oldptr, MIN(size, oldsize));
     free(oldptr);
-
     return newptr;
 }
 
@@ -254,9 +259,7 @@ static int aligned(const void *p)
  */
 void mm_checkheap(int lineno)
 {
-    
 }
-
 
 /*
  * extend_heap - Extend heap with free block and return its block pointer
@@ -270,9 +273,11 @@ static void *extend_heap(size_t words)
     size = (words % 2) ? (words + 1) * WSIZE : words * WSIZE;
     if ((long)(bp = mem_sbrk(size)) == -1)
         return NULL;
+
 #ifdef DEBUG
     printf("extend_heap: %d\n", size);
 #endif
+
     /* Initialize free block header/footer and the epilogue header */
     PUT(HDRP(bp), PACK(size, 0));         /* Free block header */
     PUT(FTRP(bp), PACK(size, 0));         /* Free block footer */
@@ -292,27 +297,32 @@ void *place(void *bp, size_t asize)
         delete (bp);
     }
 
-    /* 不能分割 */
-    if (rest_size < 2 * DSIZE)
+    /* 可以分割 */
+    if (rest_size >= 2 * DSIZE)
+    {
+        if (asize < 1024)
+        {
+            PUT(HDRP(bp), PACK(asize, 1));
+            PUT(FTRP(bp), PACK(asize, 1));
+            PUT(HDRP(NEXT_BLKP(bp)), PACK(rest_size, 0));
+            PUT(FTRP(NEXT_BLKP(bp)), PACK(rest_size, 0));
+            coalesce(NEXT_BLKP(bp));
+            return bp;
+        }
+        else
+        {
+            PUT(HDRP(bp), PACK(rest_size, 0));
+            PUT(FTRP(bp), PACK(rest_size, 0));
+            PUT(HDRP(NEXT_BLKP(bp)), PACK(asize, 1));
+            PUT(FTRP(NEXT_BLKP(bp)), PACK(asize, 1));
+            coalesce(bp);
+            return NEXT_BLKP(bp);
+        }
+    }
+    else
     {
         PUT(HDRP(bp), PACK(block_size, 1));
         PUT(FTRP(bp), PACK(block_size, 1));
-        return bp;
-    }
-
-    /* 可以分割 */
-    else
-    {
-        PUT(HDRP(bp), PACK(asize, 1));
-        PUT(FTRP(bp), PACK(asize, 1));
-        PUT(HDRP(NEXT_BLKP(bp)), PACK(rest_size, 0));
-        PUT(FTRP(NEXT_BLKP(bp)), PACK(rest_size, 0));
-    #ifdef DEBUG
-        printf("seperate %d, rest %d\n", asize, rest_size);
-        printf("%llx: %llx~%llx %lld\n", bp, HDRP(bp), FTRP(bp)+4, GET_SIZE(HDRP(bp)));
-        printf("%llx: %llx~%llx %lld\n", NEXT_BLKP(bp), HDRP(NEXT_BLKP(bp)), FTRP(NEXT_BLKP(bp))+4, GET_SIZE(HDRP(NEXT_BLKP(bp))));
-    #endif    
-        coalesce(NEXT_BLKP(bp));
         return bp;
     }
 }
@@ -325,7 +335,7 @@ void *find_fit(size_t asize)
         printf("find_fit: %d\n", i);
 #endif
         char *cur = GET_LINK_FIRST(i);
-        while (cur != heap_start)
+        while (cur != heap_listp)
         {
             if (GET_SIZE(HDRP(cur)) >= asize)
             {
@@ -363,12 +373,12 @@ void *coalesce(void *bp)
     else if (!prev_alloc && next_alloc)
     { /* 只合并前面 */
         delete (PREV_BLKP(bp));
-    #ifdef DEBUG
+#ifdef DEBUG
         printf("前面合并\n");
         printf("bp: %llx\n", bp);
         printf("删除%llx后\n", PREV_BLKP(bp));
         print_free_list("coalesce");
-    #endif
+#endif
         size_t size = GET_SIZE(HDRP(bp)) + GET_SIZE(HDRP(PREV_BLKP(bp)));
         PUT(FTRP(bp), PACK(size, 0));
         PUT(HDRP(PREV_BLKP(bp)), PACK(size, 0));
@@ -378,9 +388,9 @@ void *coalesce(void *bp)
 
     else
     { /* 合并前后 */
-    #ifdef DEBUG
+#ifdef DEBUG
         printf("前后合并\n");
-    #endif
+#endif
         delete (PREV_BLKP(bp));
         delete (NEXT_BLKP(bp));
         size_t size = GET_SIZE(HDRP(bp)) + GET_SIZE(HDRP(PREV_BLKP(bp))) +
@@ -397,25 +407,27 @@ void *coalesce(void *bp)
 /* 找到待分配空间大小对应的空闲链表，返回其下标 */
 int search(size_t asize)
 {
-    // TODO: There are quicker ways with bit manipulation.
-    if (asize <= 32)
+    if (asize <= 16)
         return 0;
-    else if (asize <= 64)
+    else if (asize <= 32)
         return 1;
-    else if (asize <= 128)
+    else if (asize <= 64)
         return 2;
-    else if (asize <= 256)
+    else if (asize <= 128)
         return 3;
-    else if (asize <= 512)
+    else if (asize <= 256)
         return 4;
-    else if (asize <= 1024)
+    else if (asize <= 512)
         return 5;
-    else if (asize <= 2048)
+    else if (asize <= 1024)
         return 6;
-    else if (asize <= 4096)
+    else if (asize <= 2048)
         return 7;
-    else
+    else if (asize <= 4096)
         return 8;
+    else if (asize <= 8192)
+        return 9;
+    else return 10;
 }
 /*
  * [1<<4, 1<<5]
@@ -437,17 +449,17 @@ void insert(void *bp)
     char *first = GET_LINK_FIRST(index);
 
     /* 该空闲块插入到空链表 */
-    if (first == heap_start)
+    if (first == heap_listp)
     {
         PUT(bp, NULL);
         PUT(bp + WSIZE, NULL);
-        PUT(heap_start + index * WSIZE, bp);
+        PUT(heap_listp + index * WSIZE, bp);
         return;
     }
 
     /* 该空闲块插入到链表中间 */
     char *cur = first;
-    while (GET_LINK_SUCC(cur) != heap_start)
+    while (GET_LINK_SUCC(cur) != heap_listp)
     {
         char *next = GET_LINK_SUCC(cur);
         if (size <= GET_SIZE(HDRP(next)))
@@ -471,20 +483,27 @@ void insert(void *bp)
 /* 将位于bp的空闲块从对应大小类链表中删除 */
 void delete(void *bp)
 {
+    if (GET_LINK_PRED(bp) == heap_listp && GET_LINK_SUCC(bp) == heap_listp)
+    {
+        PUT(heap_listp + search(GET_SIZE(HDRP(bp))) * WSIZE, NULL);
+        return;
+    }
     /* 该空闲块位于链表中间 */
-    if (GET_LINK_PRED(bp) != heap_start && GET_LINK_SUCC(bp) != heap_start)
+    if (GET_LINK_PRED(bp) != heap_listp && GET_LINK_SUCC(bp) != heap_listp)
     {
         PUT(GET_LINK_PRED(bp) + WSIZE, GET_LINK_SUCC(bp));
         PUT(GET_LINK_SUCC(bp), GET_LINK_PRED(bp));
+        return;
     }
     /* 该空闲块位于链表头部 */
-    else if (GET_LINK_PRED(bp) == heap_start && GET_LINK_SUCC(bp) != heap_start)
+    else if (GET_LINK_PRED(bp) == heap_listp && GET_LINK_SUCC(bp) != heap_listp)
     {
-        PUT(heap_start + search(GET_SIZE(HDRP(bp))) * WSIZE, GET_LINK_SUCC(bp));
+        PUT(heap_listp + search(GET_SIZE(HDRP(bp))) * WSIZE, GET_LINK_SUCC(bp));
         PUT(GET_LINK_SUCC(bp), NULL);
+        return;
     }
     /* 该空闲块位于链表尾部 */
-    else if (GET_LINK_PRED(bp) != heap_start && GET_LINK_SUCC(bp) == heap_start)
+    else if (GET_LINK_PRED(bp) != heap_listp && GET_LINK_SUCC(bp) == heap_listp)
     {
         PUT(GET_LINK_PRED(bp) + WSIZE, NULL);
         PUT(GET_LINK_SUCC(bp), NULL);
@@ -492,7 +511,7 @@ void delete(void *bp)
     /* 该空闲块是链表中唯一一个 */
     else
     {
-        PUT(heap_start + search(GET_SIZE(HDRP(bp))) * WSIZE, NULL);
+        PUT(heap_listp + search(GET_SIZE(HDRP(bp))) * WSIZE, NULL);
     }
 }
 static void print_free_list(char *__FUNCNAME__)
@@ -500,13 +519,13 @@ static void print_free_list(char *__FUNCNAME__)
     printf("-------------------------------print_free_list-------------------------------\n");
     for (int i = 0; i < CLASS_NUM; i++)
     {
-        if (GET_LINK_FIRST(i) == heap_start)
+        if (GET_LINK_FIRST(i) == heap_listp)
             continue;
         printf("class %d: \n", i);
         char *cur = GET_LINK_FIRST(i);
-        while (cur != heap_start)
+        while (cur != heap_listp)
         {
-            printf("  0x%llx~0x%llx: %d=%d, pre:%llx, suc:%llx\n", HDRP(cur), FTRP(cur)+WSIZE, GET_SIZE(HDRP(cur)), GET_SIZE(FTRP(cur)), GET_LINK_PRED(cur), GET_LINK_SUCC(cur));
+            printf("  0x%llx~0x%llx: %d=%d, pre:%llx, suc:%llx\n", HDRP(cur), FTRP(cur) + WSIZE, GET_SIZE(HDRP(cur)), GET_SIZE(FTRP(cur)), GET_LINK_PRED(cur), GET_LINK_SUCC(cur));
             cur = GET_LINK_SUCC(cur);
         }
     }

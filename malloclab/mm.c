@@ -27,10 +27,9 @@
 #include "memlib.h"
 
  /* If you want debugging output, use the following macro.  When you hand
-  * in, remove the #define DEBUG line. */ 
-/* uncommment this line to enable debug mode */
-//#define DEBUG
-/* ------------------------------------------*/
+  * in, remove the #define DEBUG line. */
+  //#define DEBUG
+
 #ifdef DEBUG
 #define dbg_printf(...) printf(__VA_ARGS__)
 #else
@@ -69,8 +68,9 @@
 #define PUT(p, val) (*(unsigned int *)(p) = (unsigned int)(long)(val))
 
 /* Read the size and allocated fields from address p */
-#define GET_SIZE(p) (GET(p) & ~0x7)
-#define GET_ALLOC(p) (GET(p) & 0x1)
+#define GET_SIZE(p)         (GET(p) & ~0x7)
+#define GET_ALLOC(p)        (GET(p) & 0x1)
+#define GET_PREV_ALLOC(P)   (GET(p) & 0x2) 
 
 /* Given block ptr bp, compute address of its header and footer */
 #define HDRP(bp) ((char *)(bp)-WSIZE)
@@ -152,18 +152,15 @@ void* malloc(size_t size) {
         return NULL;
 
     /* Adjust block size to include overhead and alignment reqs. */
-    if (size <= DSIZE)
-        asize = 2 * DSIZE;
-    else
-        asize = DSIZE * ((size + (DSIZE)+(DSIZE - 1)) / DSIZE);
+    asize = ALIGN(size + WSIZE);
 
-    /* Search the free list for a fit */
-    if ((bp = find_fit(asize)) != NULL) {
+        /* Search the free list for a fit */
+        if ((bp = find_fit(asize)) != NULL) {
 #ifdef DEBUG
-        printf("find fit at %p\n", bp);
+            printf("find fit at %p\n", bp);
 #endif
-        return place(bp, asize);
-    }
+            return place(bp, asize);
+        }
 
     /* No fit found. Get more memory and place the block */
     extendsize = MAX(asize, CHUNKSIZE);
@@ -260,7 +257,7 @@ static int aligned(const void* p) {
  */
  /* useful functions for checking blocks and lists */
 void check_block(void* bp) {
-    if (!in_heap(HDRP(bp)) || !in_heap(FTRP(bp)+WSIZE)) {
+    if (!in_heap(HDRP(bp)) || !in_heap(FTRP(bp) + WSIZE)) {
         printf("Block at %p is out of heap!\n", bp);
         exit(-1);
     }
@@ -275,7 +272,7 @@ void check_block(void* bp) {
     if (GET_SIZE(HDRP(bp)) < 2 * DSIZE) {
         printf("Block at %p is too small!\n", bp);
         exit(-1);
-    }   
+    }
 }
 void mm_checkheap(int lineno) {
     /* Check whether the heap is initialized */
@@ -303,7 +300,7 @@ void mm_checkheap(int lineno) {
             cur = GET_LINK_SUCC(cur);
         }
     }
-    
+
     /* Check the whole heap */
     int free_num_heap = 0;
     char* cur = NEXT_BLKP(heap_listp);
@@ -320,8 +317,8 @@ void mm_checkheap(int lineno) {
         cur = NEXT_BLKP(cur);
     }
 
-    if (cur-1 != mem_heap_hi()) {
-        printf("Bad heap end: %p, should be: %p\n", cur-1, mem_heap_hi());
+    if (cur - 1 != mem_heap_hi()) {
+        printf("Bad heap end: %p, should be: %p\n", cur - 1, mem_heap_hi());
         exit(-1);
     }
     if (free_num_heap != free_num_linked) {

@@ -3,11 +3,5 @@
 - Fisrt fit
 
 # Error traces:
-- bash
-- chrome
-- corners.rep
-- firefox.rep
-- freeciv.rep
-- login.rep
-- perl.{1..3}.rep
-- pulseaudio.rep
+mm.c分类放
+realloc优化

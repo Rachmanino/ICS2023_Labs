@@ -1,263 +1,830 @@
-uri: http://localhost:29492/home.html
 GET /home.html HTTP/1.0
-uri: http://localhost:29492/csapp.c
+Host: localhost
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:10.0.3) Gecko/20120305 Firefox/10.0.3
+Connection: close
+Proxy-Connection: close
+Accept: */*
+
+
+
+
 GET /csapp.c HTTP/1.0
-uri: http://localhost:1725/nop-file.txt
-GET /nop-file.txt HTTP/1.0
-uri: http://localhost:5052/tiny.c
+Host: localhostape	10083/tcp			# amanda backup services
+sgi-cmsd	17001/udp		# Cluster membership services daemon
+sgi-crsd	17002/udp
+sgi-gcd		17003/udp			# SGI Group membership daemon
+sgi-cad		17004/tcp			# Cluster Admin daemon
+binkp		24554/tcp			# binkp fidonet protocol
+asp		27374/tcp			# Address Search Protocol
+asp		27374/udp
+csync2		30865/tcp			# cluster synchronization tool
+dircproxy	57000/tcp			# Detachable IRC Proxy
+tfido		60177/tcp			# fidonet EMSI over telnet
+fido		60179/tcp			# fidonet EMSI over TCP
+
+# Local services
+rocess
+afs3-update	7008/udp			# server-to-server updater
+afs3-rmtsys	7009/udp			# remote cache manager service
+font-service	7100/tcp	xfs		# X Font Service
+http-alt	8080/tcp	webcache	# WWW caching service
+puppet		8140/tcp			# The Puppet master service
+bacula-dir	9101/tcp			# Bacula Director
+bacula-fd	9102/tcp			# Bacula File Daemon
+bacula-sd	9103/tcp			# Bacula Storage Daemon
+xmms2		9667/tcp	# Cross-platform Music Multiplexing System
+nbd		10809/tcp			# Linux Network Block Device
+zabbix-agent	10050/tcp			# Zabbix Agent
+zabbix-trapper	10051/tcp			# Zabbix Trapper
+amanda		10080/tcp			# amanda backup services
+dicom		11112/tcp
+hkp		11371/tcp			# OpenPGP HTTP Keyserver
+db-lsp		17500/tcp			# Dropbox LanSync Protocol
+dcap		22125/tcp			# dCache Access Protocol
+gsidcap		22128/tcp			# GSI dCache Access Protocol
+wnn6		22273/tcp			# wnn6
+
+#
+# Datagram Delivery Protocol services
+#
+rtmp		1/ddp			# Routing Table Maintenance Protocol
+nbp		2/ddp			# Name Binding Protocol
+echo		4/ddp			# AppleTalk Echo Protocol
+zip		6/ddp			# Zone Information Protocol
+
+#=========================================================================
+# The remaining port numbers are not as allocated by IANA.
+#=========================================================================
+
+# Kerberos (Project Athena/MIT) services
+kerberos4	750/udp		kerberos-iv kdc	# Kerberos (server)
+kerberos4	750/tcp		kerberos-iv kdc
+kerberos-master	751/udp		kerberos_master	# Kerberos authentication
+kerberos-master	751/tcp
+passwd-server	752/udp		passwd_server	# Kerberos passwd server
+krb-prop	754/tcp		krb_prop krb5_prop hprop # Kerberos slave propagation
+zephyr-srv	2102/udp			# Zephyr server
+zephyr-clt	2103/udp			# Zephyr serv-hm connection
+zephyr-hm	2104/udp			# Zephyr hostmanager
+iprop		2121/tcp			# incremental propagation
+supfilesrv	871/tcp			# Software Upgrade Protocol server
+supfiledbg	1127/tcp		# Software Upgrade Protocol debugging
+
+#
+# Services added for the Debian GNU/Linux distribution
+#
+poppassd	106/tcp				# Eudora
+moira-db	775/tcp		moira_db	# Moira database
+moira-update	777/tcp		moira_update	# Moira update protocol
+moira-ureg	779/udp		moira_ureg	# Moira user registration
+spamd		783/tcp				# spamassassin daemon
+skkserv		1178/tcp			# skk jisho server port
+predict		1210/udp			# predict -- satellite tracking
+rmtcfg		1236/tcp			# Gracilis Packeten remote config server
+xtel		1313/tcp			# french minitel
+xtelw		1314/tcp			# french minitel
+zebrasrv	2600/tcp			# zebra service
+zebra		2601/tcp			# zebra vty
+ripd		2602/tcp			# ripd vty (zebra)
+ripngd		2603/tcp			# ripngd vty (zebra)
+ospfd		2604/tcp			# ospfd vty (zebra)
+bgpd		2605/tcp			# bgpd vty (zebra)
+ospf6d		2606/tcp			# ospf6d vty (zebra)
+ospfapi		2607/tcp			# OSPF-API
+isisd		2608/tcp			# ISISd vty (zebra)
+fax		4557/tcp			# FAX transmission service (old)
+hylafax		4559/tcp			# HylaFAX client-server protocol (new)
+munin		4949/tcp	lrrd		# Munin
+rplay		5555/udp			# RPlay audio service
+nrpe		5666/tcp			# Nagios Remote Plugin Executor
+nsca		5667/tcp			# Nagios Agent - NSCA
+canna		5680/tcp			# cannaserver
+syslog-tls	6514/tcp			# Syslog over TLS [RFC5425]
+sane-port	6566/tcp	sane saned	# SANE network scanner daemon
+ircd		6667/tcp			# Internet Relay Chat
+zope-ftp	8021/tcp			# zope management by ftp
+tproxy		8081/tcp			# Transparent Proxy
+omniorb		8088/tcp			# OmniORB
+clc-build-daemon 8990/tcp			# Common lisp build daemon
+xinetd		9098/tcp
+git		9418/tcp			# Git Version Control System
+zope		9673/tcp			# zope server
+webmin		10000/tcp
+kamanda		10081/tcp			# amanda backup services (Kerberos)
+amandaidx	10082/tcp			# amanda backup servic
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:10.0.3) Gecko/20120305 Firefox/10.0.3
+Connection: close
+Proxy-Connection: close
+Accept: */*
+Accept: */*
+
+
+
+
 GET /tiny.c HTTP/1.0
-uri: http://localhost:5052/home.html
-GET /home.html HTTP/1.0
-uri: http://localhost:19651/home.html
-GET /home.html HTTP/1.0
-uri: http://localhost:19651/csapp.c
-GET /csapp.c HTTP/1.0
-uri: http://localhost:15845/home.html
-port: 
-GET /home.html HTTP/1.0
-uri: http://localhost:15845/csapp.c
-port: 
-GET /csapp.c HTTP/1.0
-uri: http://localhost:6248/nop-file.txt
-port: 
-GET /nop-file.txt HTTP/1.0
-uri: http://localhost:25724/tiny.c
-port: 
-GET /tiny.c HTTP/1.0
-uri: http://localhost:25724/home.html
-port: 
-GET /home.html HTTP/1.0
-uri: http://localhost:10446/home.html
-GET /home.html HTTP/1.0
-port: 10446
-uri: http://localhost:10446/csapp.c
-GET /csapp.c HTTP/1.0
-port: 10446
-uri: http://localhost:27867/home.html
-GET /home.html HTTP/1.0
-port: 27867
-uri: http://localhost:27867/csapp.c
-GET /csapp.c HTTP/1.0
-port: 27867
-uri: http://localhost:27219/nop-file.txt
-GET /nop-file.txt HTTP/1.0
-port: 27219
-uri: http://localhost:12930/tiny.c
-GET /tiny.c HTTP/1.0
-port: 12930
-uri: http://localhost:12930/home.html
-GET /home.html HTTP/1.0
-port: 12930
-uri: http://localhost:7770/home.html
-GET /home.html HTTP/1.0
-port: 7770
-uri: http://localhost:7770/csapp.c
-GET /csapp.c HTTP/1.0
-port: 7770
-uri: http://localhost:32297/nop-file.txt
-GET /nop-file.txt HTTP/1.0
-port: 32297
-uri: http://localhost:11049/home.html
-GET /home.html HTTP/1.0
-port: 11049
-uri: http://localhost:11049/csapp.c
-GET /csapp.c HTTP/1.0
-port: 11049
-uri: http://localhost:30774/home.html
-GET /home.html HTTP/1.0
-port: 30774
-uri: http://localhost:30774/csapp.c
-GET /csapp.c HTTP/1.0
-port: 30774
-uri: http://localhost:32651/nop-file.txt
-GET /nop-file.txt HTTP/1.0
-port: 32651
-uri: http://localhost:1359/tiny.c
-GET /tiny.c HTTP/1.0
-port: 1359
-uri: http://localhost:1359/home.html
-GET /home.html HTTP/1.0
-port: 1359
-uri: http://localhost:1942/home.html
-GET /home.html HTTP/1.0
-port: 1942
-uri: http://localhost:1942/csapp.c
-GET /csapp.c HTTP/1.0
-port: 1942
-uri: http://localhost:19119/home.html
-GET /home.html HTTP/1.0
-port: 19119
-uri: http://localhost:19119/csapp.c
-GET /csapp.c HTTP/1.0
-port: 19119
-uri: http://localhost:14285/nop-file.txt
-GET /nop-file.txt HTTP/1.0
-port: 14285
-uri: http://localhost:4994/home.html
-GET /home.html HTTP/1.0
-port: 4994
-uri: http://localhost:4994/csapp.c
-GET /csapp.c HTTP/1.0
-port: 4994
-uri: http://localhost:4994/tiny.c
-GET /tiny.c HTTP/1.0
-port: 4994
-uri: http://localhost:4994/godzilla.jpg
+Host: localhostape	10083/tcp			# amanda backup services
+sgi-cmsd	17001/udp		# Cluster membership services daemon
+sgi-crsd	17002/udp
+sgi-gcd		17003/udp			# SGI Group membership daemon
+sgi-cad		17004/tcp			# Cluster Admin daemon
+binkp		24554/tcp			# binkp fidonet protocol
+asp		27374/tcp			# Address Search Protocol
+asp		27374/udp
+csync2		30865/tcp			# cluster synchronization tool
+dircproxy	57000/tcp			# Detachable IRC Proxy
+tfido		60177/tcp			# fidonet EMSI over telnet
+fido		60179/tcp			# fidonet EMSI over TCP
+
+# Local services
+rocess
+afs3-update	7008/udp			# server-to-server updater
+afs3-rmtsys	7009/udp			# remote cache manager service
+font-service	7100/tcp	xfs		# X Font Service
+http-alt	8080/tcp	webcache	# WWW caching service
+puppet		8140/tcp			# The Puppet master service
+bacula-dir	9101/tcp			# Bacula Director
+bacula-fd	9102/tcp			# Bacula File Daemon
+bacula-sd	9103/tcp			# Bacula Storage Daemon
+xmms2		9667/tcp	# Cross-platform Music Multiplexing System
+nbd		10809/tcp			# Linux Network Block Device
+zabbix-agent	10050/tcp			# Zabbix Agent
+zabbix-trapper	10051/tcp			# Zabbix Trapper
+amanda		10080/tcp			# amanda backup services
+dicom		11112/tcp
+hkp		11371/tcp			# OpenPGP HTTP Keyserver
+db-lsp		17500/tcp			# Dropbox LanSync Protocol
+dcap		22125/tcp			# dCache Access Protocol
+gsidcap		22128/tcp			# GSI dCache Access Protocol
+wnn6		22273/tcp			# wnn6
+
+#
+# Datagram Delivery Protocol services
+#
+rtmp		1/ddp			# Routing Table Maintenance Protocol
+nbp		2/ddp			# Name Binding Protocol
+echo		4/ddp			# AppleTalk Echo Protocol
+zip		6/ddp			# Zone Information Protocol
+
+#=========================================================================
+# The remaining port numbers are not as allocated by IANA.
+#=========================================================================
+
+# Kerberos (Project Athena/MIT) services
+kerberos4	750/udp		kerberos-iv kdc	# Kerberos (server)
+kerberos4	750/tcp		kerberos-iv kdc
+kerberos-master	751/udp		kerberos_master	# Kerberos authentication
+kerberos-master	751/tcp
+passwd-server	752/udp		passwd_server	# Kerberos passwd server
+krb-prop	754/tcp		krb_prop krb5_prop hprop # Kerberos slave propagation
+zephyr-srv	2102/udp			# Zephyr server
+zephyr-clt	2103/udp			# Zephyr serv-hm connection
+zephyr-hm	2104/udp			# Zephyr hostmanager
+iprop		2121/tcp			# incremental propagation
+supfilesrv	871/tcp			# Software Upgrade Protocol server
+supfiledbg	1127/tcp		# Software Upgrade Protocol debugging
+
+#
+# Services added for the Debian GNU/Linux distribution
+#
+poppassd	106/tcp				# Eudora
+moira-db	775/tcp		moira_db	# Moira database
+moira-update	777/tcp		moira_update	# Moira update protocol
+moira-ureg	779/udp		moira_ureg	# Moira user registration
+spamd		783/tcp				# spamassassin daemon
+skkserv		1178/tcp			# skk jisho server port
+predict		1210/udp			# predict -- satellite tracking
+rmtcfg		1236/tcp			# Gracilis Packeten remote config server
+xtel		1313/tcp			# french minitel
+xtelw		1314/tcp			# french minitel
+zebrasrv	2600/tcp			# zebra service
+zebra		2601/tcp			# zebra vty
+ripd		2602/tcp			# ripd vty (zebra)
+ripngd		2603/tcp			# ripngd vty (zebra)
+ospfd		2604/tcp			# ospfd vty (zebra)
+bgpd		2605/tcp			# bgpd vty (zebra)
+ospf6d		2606/tcp			# ospf6d vty (zebra)
+ospfapi		2607/tcp			# OSPF-API
+isisd		2608/tcp			# ISISd vty (zebra)
+fax		4557/tcp			# FAX transmission service (old)
+hylafax		4559/tcp			# HylaFAX client-server protocol (new)
+munin		4949/tcp	lrrd		# Munin
+rplay		5555/udp			# RPlay audio service
+nrpe		5666/tcp			# Nagios Remote Plugin Executor
+nsca		5667/tcp			# Nagios Agent - NSCA
+canna		5680/tcp			# cannaserver
+syslog-tls	6514/tcp			# Syslog over TLS [RFC5425]
+sane-port	6566/tcp	sane saned	# SANE network scanner daemon
+ircd		6667/tcp			# Internet Relay Chat
+zope-ftp	8021/tcp			# zope management by ftp
+tproxy		8081/tcp			# Transparent Proxy
+omniorb		8088/tcp			# OmniORB
+clc-build-daemon 8990/tcp			# Common lisp build daemon
+xinetd		9098/tcp
+git		9418/tcp			# Git Version Control System
+zope		9673/tcp			# zope server
+webmin		10000/tcp
+kamanda		10081/tcp			# amanda backup services (Kerberos)
+amandaidx	10082/tcp			# amanda backup servic
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:10.0.3) Gecko/20120305 Firefox/10.0.3
+Connection: close
+Proxy-Connection: close
+Accept: */*
+Accept: */*
+Accept: */*
+
+
+
+
 GET /godzilla.jpg HTTP/1.0
-port: 4994
-uri: http://localhost:4994/tiny
+Host: localhostape	10083/tcp			# amanda backup services
+sgi-cmsd	17001/udp		# Cluster membership services daemon
+sgi-crsd	17002/udp
+sgi-gcd		17003/udp			# SGI Group membership daemon
+sgi-cad		17004/tcp			# Cluster Admin daemon
+binkp		24554/tcp			# binkp fidonet protocol
+asp		27374/tcp			# Address Search Protocol
+asp		27374/udp
+csync2		30865/tcp			# cluster synchronization tool
+dircproxy	57000/tcp			# Detachable IRC Proxy
+tfido		60177/tcp			# fidonet EMSI over telnet
+fido		60179/tcp			# fidonet EMSI over TCP
+
+# Local services
+rocess
+afs3-update	7008/udp			# server-to-server updater
+afs3-rmtsys	7009/udp			# remote cache manager service
+font-service	7100/tcp	xfs		# X Font Service
+http-alt	8080/tcp	webcache	# WWW caching service
+puppet		8140/tcp			# The Puppet master service
+bacula-dir	9101/tcp			# Bacula Director
+bacula-fd	9102/tcp			# Bacula File Daemon
+bacula-sd	9103/tcp			# Bacula Storage Daemon
+xmms2		9667/tcp	# Cross-platform Music Multiplexing System
+nbd		10809/tcp			# Linux Network Block Device
+zabbix-agent	10050/tcp			# Zabbix Agent
+zabbix-trapper	10051/tcp			# Zabbix Trapper
+amanda		10080/tcp			# amanda backup services
+dicom		11112/tcp
+hkp		11371/tcp			# OpenPGP HTTP Keyserver
+db-lsp		17500/tcp			# Dropbox LanSync Protocol
+dcap		22125/tcp			# dCache Access Protocol
+gsidcap		22128/tcp			# GSI dCache Access Protocol
+wnn6		22273/tcp			# wnn6
+
+#
+# Datagram Delivery Protocol services
+#
+rtmp		1/ddp			# Routing Table Maintenance Protocol
+nbp		2/ddp			# Name Binding Protocol
+echo		4/ddp			# AppleTalk Echo Protocol
+zip		6/ddp			# Zone Information Protocol
+
+#=========================================================================
+# The remaining port numbers are not as allocated by IANA.
+#=========================================================================
+
+# Kerberos (Project Athena/MIT) services
+kerberos4	750/udp		kerberos-iv kdc	# Kerberos (server)
+kerberos4	750/tcp		kerberos-iv kdc
+kerberos-master	751/udp		kerberos_master	# Kerberos authentication
+kerberos-master	751/tcp
+passwd-server	752/udp		passwd_server	# Kerberos passwd server
+krb-prop	754/tcp		krb_prop krb5_prop hprop # Kerberos slave propagation
+zephyr-srv	2102/udp			# Zephyr server
+zephyr-clt	2103/udp			# Zephyr serv-hm connection
+zephyr-hm	2104/udp			# Zephyr hostmanager
+iprop		2121/tcp			# incremental propagation
+supfilesrv	871/tcp			# Software Upgrade Protocol server
+supfiledbg	1127/tcp		# Software Upgrade Protocol debugging
+
+#
+# Services added for the Debian GNU/Linux distribution
+#
+poppassd	106/tcp				# Eudora
+moira-db	775/tcp		moira_db	# Moira database
+moira-update	777/tcp		moira_update	# Moira update protocol
+moira-ureg	779/udp		moira_ureg	# Moira user registration
+spamd		783/tcp				# spamassassin daemon
+skkserv		1178/tcp			# skk jisho server port
+predict		1210/udp			# predict -- satellite tracking
+rmtcfg		1236/tcp			# Gracilis Packeten remote config server
+xtel		1313/tcp			# french minitel
+xtelw		1314/tcp			# french minitel
+zebrasrv	2600/tcp			# zebra service
+zebra		2601/tcp			# zebra vty
+ripd		2602/tcp			# ripd vty (zebra)
+ripngd		2603/tcp			# ripngd vty (zebra)
+ospfd		2604/tcp			# ospfd vty (zebra)
+bgpd		2605/tcp			# bgpd vty (zebra)
+ospf6d		2606/tcp			# ospf6d vty (zebra)
+ospfapi		2607/tcp			# OSPF-API
+isisd		2608/tcp			# ISISd vty (zebra)
+fax		4557/tcp			# FAX transmission service (old)
+hylafax		4559/tcp			# HylaFAX client-server protocol (new)
+munin		4949/tcp	lrrd		# Munin
+rplay		5555/udp			# RPlay audio service
+nrpe		5666/tcp			# Nagios Remote Plugin Executor
+nsca		5667/tcp			# Nagios Agent - NSCA
+canna		5680/tcp			# cannaserver
+syslog-tls	6514/tcp			# Syslog over TLS [RFC5425]
+sane-port	6566/tcp	sane saned	# SANE network scanner daemon
+ircd		6667/tcp			# Internet Relay Chat
+zope-ftp	8021/tcp			# zope management by ftp
+tproxy		8081/tcp			# Transparent Proxy
+omniorb		8088/tcp			# OmniORB
+clc-build-daemon 8990/tcp			# Common lisp build daemon
+xinetd		9098/tcp
+git		9418/tcp			# Git Version Control System
+zope		9673/tcp			# zope server
+webmin		10000/tcp
+kamanda		10081/tcp			# amanda backup services (Kerberos)
+amandaidx	10082/tcp			# amanda backup servic
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:10.0.3) Gecko/20120305 Firefox/10.0.3
+Connection: close
+Proxy-Connection: close
+Accept: */*
+Accept: */*
+Accept: */*
+Accept: */*
+
+
+
+
 GET /tiny HTTP/1.0
-port: 4994
-uri: http://localhost:6317/nop-file.txt
+Host: localhostape	10083/tcp			# amanda backup services
+sgi-cmsd	17001/udp		# Cluster membership services daemon
+sgi-crsd	17002/udp
+sgi-gcd		17003/udp			# SGI Group membership daemon
+sgi-cad		17004/tcp			# Cluster Admin daemon
+binkp		24554/tcp			# binkp fidonet protocol
+asp		27374/tcp			# Address Search Protocol
+asp		27374/udp
+csync2		30865/tcp			# cluster synchronization tool
+dircproxy	57000/tcp			# Detachable IRC Proxy
+tfido		60177/tcp			# fidonet EMSI over telnet
+fido		60179/tcp			# fidonet EMSI over TCP
+
+# Local services
+rocess
+afs3-update	7008/udp			# server-to-server updater
+afs3-rmtsys	7009/udp			# remote cache manager service
+font-service	7100/tcp	xfs		# X Font Service
+http-alt	8080/tcp	webcache	# WWW caching service
+puppet		8140/tcp			# The Puppet master service
+bacula-dir	9101/tcp			# Bacula Director
+bacula-fd	9102/tcp			# Bacula File Daemon
+bacula-sd	9103/tcp			# Bacula Storage Daemon
+xmms2		9667/tcp	# Cross-platform Music Multiplexing System
+nbd		10809/tcp			# Linux Network Block Device
+zabbix-agent	10050/tcp			# Zabbix Agent
+zabbix-trapper	10051/tcp			# Zabbix Trapper
+amanda		10080/tcp			# amanda backup services
+dicom		11112/tcp
+hkp		11371/tcp			# OpenPGP HTTP Keyserver
+db-lsp		17500/tcp			# Dropbox LanSync Protocol
+dcap		22125/tcp			# dCache Access Protocol
+gsidcap		22128/tcp			# GSI dCache Access Protocol
+wnn6		22273/tcp			# wnn6
+
+#
+# Datagram Delivery Protocol services
+#
+rtmp		1/ddp			# Routing Table Maintenance Protocol
+nbp		2/ddp			# Name Binding Protocol
+echo		4/ddp			# AppleTalk Echo Protocol
+zip		6/ddp			# Zone Information Protocol
+
+#=========================================================================
+# The remaining port numbers are not as allocated by IANA.
+#=========================================================================
+
+# Kerberos (Project Athena/MIT) services
+kerberos4	750/udp		kerberos-iv kdc	# Kerberos (server)
+kerberos4	750/tcp		kerberos-iv kdc
+kerberos-master	751/udp		kerberos_master	# Kerberos authentication
+kerberos-master	751/tcp
+passwd-server	752/udp		passwd_server	# Kerberos passwd server
+krb-prop	754/tcp		krb_prop krb5_prop hprop # Kerberos slave propagation
+zephyr-srv	2102/udp			# Zephyr server
+zephyr-clt	2103/udp			# Zephyr serv-hm connection
+zephyr-hm	2104/udp			# Zephyr hostmanager
+iprop		2121/tcp			# incremental propagation
+supfilesrv	871/tcp			# Software Upgrade Protocol server
+supfiledbg	1127/tcp		# Software Upgrade Protocol debugging
+
+#
+# Services added for the Debian GNU/Linux distribution
+#
+poppassd	106/tcp				# Eudora
+moira-db	775/tcp		moira_db	# Moira database
+moira-update	777/tcp		moira_update	# Moira update protocol
+moira-ureg	779/udp		moira_ureg	# Moira user registration
+spamd		783/tcp				# spamassassin daemon
+skkserv		1178/tcp			# skk jisho server port
+predict		1210/udp			# predict -- satellite tracking
+rmtcfg		1236/tcp			# Gracilis Packeten remote config server
+xtel		1313/tcp			# french minitel
+xtelw		1314/tcp			# french minitel
+zebrasrv	2600/tcp			# zebra service
+zebra		2601/tcp			# zebra vty
+ripd		2602/tcp			# ripd vty (zebra)
+ripngd		2603/tcp			# ripngd vty (zebra)
+ospfd		2604/tcp			# ospfd vty (zebra)
+bgpd		2605/tcp			# bgpd vty (zebra)
+ospf6d		2606/tcp			# ospf6d vty (zebra)
+ospfapi		2607/tcp			# OSPF-API
+isisd		2608/tcp			# ISISd vty (zebra)
+fax		4557/tcp			# FAX transmission service (old)
+hylafax		4559/tcp			# HylaFAX client-server protocol (new)
+munin		4949/tcp	lrrd		# Munin
+rplay		5555/udp			# RPlay audio service
+nrpe		5666/tcp			# Nagios Remote Plugin Executor
+nsca		5667/tcp			# Nagios Agent - NSCA
+canna		5680/tcp			# cannaserver
+syslog-tls	6514/tcp			# Syslog over TLS [RFC5425]
+sane-port	6566/tcp	sane saned	# SANE network scanner daemon
+ircd		6667/tcp			# Internet Relay Chat
+zope-ftp	8021/tcp			# zope management by ftp
+tproxy		8081/tcp			# Transparent Proxy
+omniorb		8088/tcp			# OmniORB
+clc-build-daemon 8990/tcp			# Common lisp build daemon
+xinetd		9098/tcp
+git		9418/tcp			# Git Version Control System
+zope		9673/tcp			# zope server
+webmin		10000/tcp
+kamanda		10081/tcp			# amanda backup services (Kerberos)
+amandaidx	10082/tcp			# amanda backup servic
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:10.0.3) Gecko/20120305 Firefox/10.0.3
+Connection: close
+Proxy-Connection: close
+Accept: */*
+Accept: */*
+Accept: */*
+Accept: */*
+Accept: */*
+
+
+
+
 GET /nop-file.txt HTTP/1.0
-port: 6317
-uri: http://localhost:7099/tiny.c
+Host: localhost
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:10.0.3) Gecko/20120305 Firefox/10.0.3
+Connection: close
+Proxy-Connection: close
+Accept: */*
+
+
+
+
 GET /tiny.c HTTP/1.0
-port: 7099
-uri: http://localhost:7099/home.html
+Host: localhost
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:10.0.3) Gecko/20120305 Firefox/10.0.3
+Connection: close
+Proxy-Connection: close
+Accept: */*
+
+
+
+
 GET /home.html HTTP/1.0
-port: 7099
-uri: http://localhost:7099/csapp.c
+Host: localhostape	10083/tcp			# amanda backup services
+sgi-cmsd	17001/udp		# Cluster membership services daemon
+sgi-crsd	17002/udp
+sgi-gcd		17003/udp			# SGI Group membership daemon
+sgi-cad		17004/tcp			# Cluster Admin daemon
+binkp		24554/tcp			# binkp fidonet protocol
+asp		27374/tcp			# Address Search Protocol
+asp		27374/udp
+csync2		30865/tcp			# cluster synchronization tool
+dircproxy	57000/tcp			# Detachable IRC Proxy
+tfido		60177/tcp			# fidonet EMSI over telnet
+fido		60179/tcp			# fidonet EMSI over TCP
+
+# Local services
+rocess
+afs3-update	7008/udp			# server-to-server updater
+afs3-rmtsys	7009/udp			# remote cache manager service
+font-service	7100/tcp	xfs		# X Font Service
+http-alt	8080/tcp	webcache	# WWW caching service
+puppet		8140/tcp			# The Puppet master service
+bacula-dir	9101/tcp			# Bacula Director
+bacula-fd	9102/tcp			# Bacula File Daemon
+bacula-sd	9103/tcp			# Bacula Storage Daemon
+xmms2		9667/tcp	# Cross-platform Music Multiplexing System
+nbd		10809/tcp			# Linux Network Block Device
+zabbix-agent	10050/tcp			# Zabbix Agent
+zabbix-trapper	10051/tcp			# Zabbix Trapper
+amanda		10080/tcp			# amanda backup services
+dicom		11112/tcp
+hkp		11371/tcp			# OpenPGP HTTP Keyserver
+db-lsp		17500/tcp			# Dropbox LanSync Protocol
+dcap		22125/tcp			# dCache Access Protocol
+gsidcap		22128/tcp			# GSI dCache Access Protocol
+wnn6		22273/tcp			# wnn6
+
+#
+# Datagram Delivery Protocol services
+#
+rtmp		1/ddp			# Routing Table Maintenance Protocol
+nbp		2/ddp			# Name Binding Protocol
+echo		4/ddp			# AppleTalk Echo Protocol
+zip		6/ddp			# Zone Information Protocol
+
+#=========================================================================
+# The remaining port numbers are not as allocated by IANA.
+#=========================================================================
+
+# Kerberos (Project Athena/MIT) services
+kerberos4	750/udp		kerberos-iv kdc	# Kerberos (server)
+kerberos4	750/tcp		kerberos-iv kdc
+kerberos-master	751/udp		kerberos_master	# Kerberos authentication
+kerberos-master	751/tcp
+passwd-server	752/udp		passwd_server	# Kerberos passwd server
+krb-prop	754/tcp		krb_prop krb5_prop hprop # Kerberos slave propagation
+zephyr-srv	2102/udp			# Zephyr server
+zephyr-clt	2103/udp			# Zephyr serv-hm connection
+zephyr-hm	2104/udp			# Zephyr hostmanager
+iprop		2121/tcp			# incremental propagation
+supfilesrv	871/tcp			# Software Upgrade Protocol server
+supfiledbg	1127/tcp		# Software Upgrade Protocol debugging
+
+#
+# Services added for the Debian GNU/Linux distribution
+#
+poppassd	106/tcp				# Eudora
+moira-db	775/tcp		moira_db	# Moira database
+moira-update	777/tcp		moira_update	# Moira update protocol
+moira-ureg	779/udp		moira_ureg	# Moira user registration
+spamd		783/tcp				# spamassassin daemon
+skkserv		1178/tcp			# skk jisho server port
+predict		1210/udp			# predict -- satellite tracking
+rmtcfg		1236/tcp			# Gracilis Packeten remote config server
+xtel		1313/tcp			# french minitel
+xtelw		1314/tcp			# french minitel
+zebrasrv	2600/tcp			# zebra service
+zebra		2601/tcp			# zebra vty
+ripd		2602/tcp			# ripd vty (zebra)
+ripngd		2603/tcp			# ripngd vty (zebra)
+ospfd		2604/tcp			# ospfd vty (zebra)
+bgpd		2605/tcp			# bgpd vty (zebra)
+ospf6d		2606/tcp			# ospf6d vty (zebra)
+ospfapi		2607/tcp			# OSPF-API
+isisd		2608/tcp			# ISISd vty (zebra)
+fax		4557/tcp			# FAX transmission service (old)
+hylafax		4559/tcp			# HylaFAX client-server protocol (new)
+munin		4949/tcp	lrrd		# Munin
+rplay		5555/udp			# RPlay audio service
+nrpe		5666/tcp			# Nagios Remote Plugin Executor
+nsca		5667/tcp			# Nagios Agent - NSCA
+canna		5680/tcp			# cannaserver
+syslog-tls	6514/tcp			# Syslog over TLS [RFC5425]
+sane-port	6566/tcp	sane saned	# SANE network scanner daemon
+ircd		6667/tcp			# Internet Relay Chat
+zope-ftp	8021/tcp			# zope management by ftp
+tproxy		8081/tcp			# Transparent Proxy
+omniorb		8088/tcp			# OmniORB
+clc-build-daemon 8990/tcp			# Common lisp build daemon
+xinetd		9098/tcp
+git		9418/tcp			# Git Version Control System
+zope		9673/tcp			# zope server
+webmin		10000/tcp
+kamanda		10081/tcp			# amanda backup services (Kerberos)
+amandaidx	10082/tcp			# amanda backup servic
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:10.0.3) Gecko/20120305 Firefox/10.0.3
+Connection: close
+Proxy-Connection: close
+Accept: */*
+Accept: */*
+
+
+
+
 GET /csapp.c HTTP/1.0
-port: 7099
-uri: http://localhost:7099/home.html
+Host: localhostape	10083/tcp			# amanda backup services
+sgi-cmsd	17001/udp		# Cluster membership services daemon
+sgi-crsd	17002/udp
+sgi-gcd		17003/udp			# SGI Group membership daemon
+sgi-cad		17004/tcp			# Cluster Admin daemon
+binkp		24554/tcp			# binkp fidonet protocol
+asp		27374/tcp			# Address Search Protocol
+asp		27374/udp
+csync2		30865/tcp			# cluster synchronization tool
+dircproxy	57000/tcp			# Detachable IRC Proxy
+tfido		60177/tcp			# fidonet EMSI over telnet
+fido		60179/tcp			# fidonet EMSI over TCP
+
+# Local services
+rocess
+afs3-update	7008/udp			# server-to-server updater
+afs3-rmtsys	7009/udp			# remote cache manager service
+font-service	7100/tcp	xfs		# X Font Service
+http-alt	8080/tcp	webcache	# WWW caching service
+puppet		8140/tcp			# The Puppet master service
+bacula-dir	9101/tcp			# Bacula Director
+bacula-fd	9102/tcp			# Bacula File Daemon
+bacula-sd	9103/tcp			# Bacula Storage Daemon
+xmms2		9667/tcp	# Cross-platform Music Multiplexing System
+nbd		10809/tcp			# Linux Network Block Device
+zabbix-agent	10050/tcp			# Zabbix Agent
+zabbix-trapper	10051/tcp			# Zabbix Trapper
+amanda		10080/tcp			# amanda backup services
+dicom		11112/tcp
+hkp		11371/tcp			# OpenPGP HTTP Keyserver
+db-lsp		17500/tcp			# Dropbox LanSync Protocol
+dcap		22125/tcp			# dCache Access Protocol
+gsidcap		22128/tcp			# GSI dCache Access Protocol
+wnn6		22273/tcp			# wnn6
+
+#
+# Datagram Delivery Protocol services
+#
+rtmp		1/ddp			# Routing Table Maintenance Protocol
+nbp		2/ddp			# Name Binding Protocol
+echo		4/ddp			# AppleTalk Echo Protocol
+zip		6/ddp			# Zone Information Protocol
+
+#=========================================================================
+# The remaining port numbers are not as allocated by IANA.
+#=========================================================================
+
+# Kerberos (Project Athena/MIT) services
+kerberos4	750/udp		kerberos-iv kdc	# Kerberos (server)
+kerberos4	750/tcp		kerberos-iv kdc
+kerberos-master	751/udp		kerberos_master	# Kerberos authentication
+kerberos-master	751/tcp
+passwd-server	752/udp		passwd_server	# Kerberos passwd server
+krb-prop	754/tcp		krb_prop krb5_prop hprop # Kerberos slave propagation
+zephyr-srv	2102/udp			# Zephyr server
+zephyr-clt	2103/udp			# Zephyr serv-hm connection
+zephyr-hm	2104/udp			# Zephyr hostmanager
+iprop		2121/tcp			# incremental propagation
+supfilesrv	871/tcp			# Software Upgrade Protocol server
+supfiledbg	1127/tcp		# Software Upgrade Protocol debugging
+
+#
+# Services added for the Debian GNU/Linux distribution
+#
+poppassd	106/tcp				# Eudora
+moira-db	775/tcp		moira_db	# Moira database
+moira-update	777/tcp		moira_update	# Moira update protocol
+moira-ureg	779/udp		moira_ureg	# Moira user registration
+spamd		783/tcp				# spamassassin daemon
+skkserv		1178/tcp			# skk jisho server port
+predict		1210/udp			# predict -- satellite tracking
+rmtcfg		1236/tcp			# Gracilis Packeten remote config server
+xtel		1313/tcp			# french minitel
+xtelw		1314/tcp			# french minitel
+zebrasrv	2600/tcp			# zebra service
+zebra		2601/tcp			# zebra vty
+ripd		2602/tcp			# ripd vty (zebra)
+ripngd		2603/tcp			# ripngd vty (zebra)
+ospfd		2604/tcp			# ospfd vty (zebra)
+bgpd		2605/tcp			# bgpd vty (zebra)
+ospf6d		2606/tcp			# ospf6d vty (zebra)
+ospfapi		2607/tcp			# OSPF-API
+isisd		2608/tcp			# ISISd vty (zebra)
+fax		4557/tcp			# FAX transmission service (old)
+hylafax		4559/tcp			# HylaFAX client-server protocol (new)
+munin		4949/tcp	lrrd		# Munin
+rplay		5555/udp			# RPlay audio service
+nrpe		5666/tcp			# Nagios Remote Plugin Executor
+nsca		5667/tcp			# Nagios Agent - NSCA
+canna		5680/tcp			# cannaserver
+syslog-tls	6514/tcp			# Syslog over TLS [RFC5425]
+sane-port	6566/tcp	sane saned	# SANE network scanner daemon
+ircd		6667/tcp			# Internet Relay Chat
+zope-ftp	8021/tcp			# zope management by ftp
+tproxy		8081/tcp			# Transparent Proxy
+omniorb		8088/tcp			# OmniORB
+clc-build-daemon 8990/tcp			# Common lisp build daemon
+xinetd		9098/tcp
+git		9418/tcp			# Git Version Control System
+zope		9673/tcp			# zope server
+webmin		10000/tcp
+kamanda		10081/tcp			# amanda backup services (Kerberos)
+amandaidx	10082/tcp			# amanda backup servic
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:10.0.3) Gecko/20120305 Firefox/10.0.3
+Connection: close
+Proxy-Connection: close
+Accept: */*
+Accept: */*
+Accept: */*
+
+
+
+
 GET /home.html HTTP/1.0
-port: 7099
-uri: http://localhost:21055/home.html
-GET /home.html HTTP/1.0
-port: 21055
-uri: http://localhost:21055/csapp.c
-GET /csapp.c HTTP/1.0
-port: 21055
-uri: http://localhost:5476/nop-file.txt
-GET /nop-file.txt HTTP/1.0
-port: 5476
-uri: http://localhost:4754/tiny.c
-GET /tiny.c HTTP/1.0
-port: 4754
-uri: http://localhost:4754/home.html
-GET /home.html HTTP/1.0
-port: 4754
-uri: http://localhost:2646/csapp.c
-GET /csapp.c HTTP/1.0
-port: 2646
-uri: http://localhost:2646/home.html
-GET /home.html HTTP/1.0
-port: 2646
-uri: http://localhost:25223/tiny.c
-GET /tiny.c HTTP/1.0
-port: 25223
-uri: http://localhost:25223/home.html
-GET /home.html HTTP/1.0
-port: 25223
-uri: http://localhost:5581/nop-file.txt
-GET /nop-file.txt HTTP/1.0
-port: 5581
-uri: http://localhost:8997/tiny.c
-GET /tiny.c HTTP/1.0
-port: 8997
-uri: http://localhost:8997/home.html
-GET /home.html HTTP/1.0
-port: 8997
-uri: http://localhost:5697/tiny.c
-GET /tiny.c HTTP/1.0
-port: 5697
-uri: http://localhost:5697/home.html
-GET /home.html HTTP/1.0
-port: 5697
-uri: http://localhost:5697/csapp.c
-GET /csapp.c HTTP/1.0
-port: 5697
-uri: http://localhost:5697/godzilla.jpg
-GET /godzilla.jpg HTTP/1.0
-port: 5697
-uri: http://localhost:5697/tiny
-GET /tiny HTTP/1.0
-port: 5697
-uri: http://localhost:24089/nop-file.txt
-GET /nop-file.txt HTTP/1.0
-port: 24089
-uri: http://localhost:26193/tiny.c
-GET /tiny.c HTTP/1.0
-port: 26193
-uri: http://localhost:26193/home.html
-GET /home.html HTTP/1.0
-port: 26193
-uri: http://localhost:3862/tiny.c
-GET /tiny.c HTTP/1.0
-port: 3862
-uri: http://localhost:3862/home.html
-GET /home.html HTTP/1.0
-port: 3862
-uri: http://localhost:25347/home.html
-GET /home.html HTTP/1.0
-port: 25347
-uri: http://localhost:25347/csapp.c
-GET /csapp.c HTTP/1.0
-port: 25347
-uri: http://localhost:1536/godzilla.jpg
-GET /godzilla.jpg HTTP/1.0
-port: 1536
-uri: http://localhost:1536/home.html
-GET /home.html HTTP/1.0
-port: 1536
-uri: http://localhost:4620/home.html
-GET /home.html HTTP/1.0
-port: 4620
-uri: http://localhost:4620/csapp.c
-GET /csapp.c HTTP/1.0
-port: 4620
-uri: http://localhost:31348/nop-file.txt
-GET /nop-file.txt HTTP/1.0
-port: 31348
-uri: http://localhost:28846/tiny.c
-GET /tiny.c HTTP/1.0
-port: 28846
-uri: http://localhost:28846/home.html
-GET /home.html HTTP/1.0
-port: 28846
-uri: http://localhost:28579/home.html
-GET /home.html HTTP/1.0
-port: 28579
-uri: http://localhost:28579/csapp.c
-GET /csapp.c HTTP/1.0
-port: 28579
-uri: http://localhost:30295/home.html
-GET /home.html HTTP/1.0
-port: 30295
-uri: http://localhost:30295/csapp.c
-GET /csapp.c HTTP/1.0
-port: 30295
-uri: http://localhost:10459/nop-file.txt
-GET /nop-file.txt HTTP/1.0
-port: 10459
-uri: http://localhost:23575/tiny.c
-GET /tiny.c HTTP/1.0
-port: 23575
-uri: http://localhost:23575/home.html
-GET /home.html HTTP/1.0
-port: 23575
-uri: http://localhost:9775/home.html
-GET /home.html HTTP/1.0
-port: 9775
-uri: http://localhost:9775/csapp.c
-GET /csapp.c HTTP/1.0
-port: 9775
-uri: http://localhost:7065/home.html
-GET /home.html HTTP/1.0
-port: 7065
-uri: http://localhost:7065/csapp.c
-GET /csapp.c HTTP/1.0
-port: 7065
-uri: http://localhost:7669/nop-file.txt
-GET /nop-file.txt HTTP/1.0
-port: 7669
-uri: http://localhost:9175/tiny.c
-GET /tiny.c HTTP/1.0
-port: 9175
-uri: http://localhost:9175/home.html
-GET /home.html HTTP/1.0
-port: 9175
-uri: http://127.0.0.1.nip.io:32192/browser-testbench/index.html
-GET /browser-testbench/index.html HTTP/1.0
-port: 32192
+Host: localhostape	10083/tcp			# amanda backup services
+sgi-cmsd	17001/udp		# Cluster membership services daemon
+sgi-crsd	17002/udp
+sgi-gcd		17003/udp			# SGI Group membership daemon
+sgi-cad		17004/tcp			# Cluster Admin daemon
+binkp		24554/tcp			# binkp fidonet protocol
+asp		27374/tcp			# Address Search Protocol
+asp		27374/udp
+csync2		30865/tcp			# cluster synchronization tool
+dircproxy	57000/tcp			# Detachable IRC Proxy
+tfido		60177/tcp			# fidonet EMSI over telnet
+fido		60179/tcp			# fidonet EMSI over TCP
+
+# Local services
+rocess
+afs3-update	7008/udp			# server-to-server updater
+afs3-rmtsys	7009/udp			# remote cache manager service
+font-service	7100/tcp	xfs		# X Font Service
+http-alt	8080/tcp	webcache	# WWW caching service
+puppet		8140/tcp			# The Puppet master service
+bacula-dir	9101/tcp			# Bacula Director
+bacula-fd	9102/tcp			# Bacula File Daemon
+bacula-sd	9103/tcp			# Bacula Storage Daemon
+xmms2		9667/tcp	# Cross-platform Music Multiplexing System
+nbd		10809/tcp			# Linux Network Block Device
+zabbix-agent	10050/tcp			# Zabbix Agent
+zabbix-trapper	10051/tcp			# Zabbix Trapper
+amanda		10080/tcp			# amanda backup services
+dicom		11112/tcp
+hkp		11371/tcp			# OpenPGP HTTP Keyserver
+db-lsp		17500/tcp			# Dropbox LanSync Protocol
+dcap		22125/tcp			# dCache Access Protocol
+gsidcap		22128/tcp			# GSI dCache Access Protocol
+wnn6		22273/tcp			# wnn6
+
+#
+# Datagram Delivery Protocol services
+#
+rtmp		1/ddp			# Routing Table Maintenance Protocol
+nbp		2/ddp			# Name Binding Protocol
+echo		4/ddp			# AppleTalk Echo Protocol
+zip		6/ddp			# Zone Information Protocol
+
+#=========================================================================
+# The remaining port numbers are not as allocated by IANA.
+#=========================================================================
+
+# Kerberos (Project Athena/MIT) services
+kerberos4	750/udp		kerberos-iv kdc	# Kerberos (server)
+kerberos4	750/tcp		kerberos-iv kdc
+kerberos-master	751/udp		kerberos_master	# Kerberos authentication
+kerberos-master	751/tcp
+passwd-server	752/udp		passwd_server	# Kerberos passwd server
+krb-prop	754/tcp		krb_prop krb5_prop hprop # Kerberos slave propagation
+zephyr-srv	2102/udp			# Zephyr server
+zephyr-clt	2103/udp			# Zephyr serv-hm connection
+zephyr-hm	2104/udp			# Zephyr hostmanager
+iprop		2121/tcp			# incremental propagation
+supfilesrv	871/tcp			# Software Upgrade Protocol server
+supfiledbg	1127/tcp		# Software Upgrade Protocol debugging
+
+#
+# Services added for the Debian GNU/Linux distribution
+#
+poppassd	106/tcp				# Eudora
+moira-db	775/tcp		moira_db	# Moira database
+moira-update	777/tcp		moira_update	# Moira update protocol
+moira-ureg	779/udp		moira_ureg	# Moira user registration
+spamd		783/tcp				# spamassassin daemon
+skkserv		1178/tcp			# skk jisho server port
+predict		1210/udp			# predict -- satellite tracking
+rmtcfg		1236/tcp			# Gracilis Packeten remote config server
+xtel		1313/tcp			# french minitel
+xtelw		1314/tcp			# french minitel
+zebrasrv	2600/tcp			# zebra service
+zebra		2601/tcp			# zebra vty
+ripd		2602/tcp			# ripd vty (zebra)
+ripngd		2603/tcp			# ripngd vty (zebra)
+ospfd		2604/tcp			# ospfd vty (zebra)
+bgpd		2605/tcp			# bgpd vty (zebra)
+ospf6d		2606/tcp			# ospf6d vty (zebra)
+ospfapi		2607/tcp			# OSPF-API
+isisd		2608/tcp			# ISISd vty (zebra)
+fax		4557/tcp			# FAX transmission service (old)
+hylafax		4559/tcp			# HylaFAX client-server protocol (new)
+munin		4949/tcp	lrrd		# Munin
+rplay		5555/udp			# RPlay audio service
+nrpe		5666/tcp			# Nagios Remote Plugin Executor
+nsca		5667/tcp			# Nagios Agent - NSCA
+canna		5680/tcp			# cannaserver
+syslog-tls	6514/tcp			# Syslog over TLS [RFC5425]
+sane-port	6566/tcp	sane saned	# SANE network scanner daemon
+ircd		6667/tcp			# Internet Relay Chat
+zope-ftp	8021/tcp			# zope management by ftp
+tproxy		8081/tcp			# Transparent Proxy
+omniorb		8088/tcp			# OmniORB
+clc-build-daemon 8990/tcp			# Common lisp build daemon
+xinetd		9098/tcp
+git		9418/tcp			# Git Version Control System
+zope		9673/tcp			# zope server
+webmin		10000/tcp
+kamanda		10081/tcp			# amanda backup services (Kerberos)
+amandaidx	10082/tcp			# amanda backup servic
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:10.0.3) Gecko/20120305 Firefox/10.0.3
+Connection: close
+Proxy-Connection: close
+Accept: */*
+Accept: */*
+Accept: */*
+Accept: */*
+
+
+
+

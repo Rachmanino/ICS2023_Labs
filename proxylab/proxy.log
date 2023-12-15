@@ -1,0 +1,263 @@
+uri: http://localhost:29492/home.html
+GET /home.html HTTP/1.0
+uri: http://localhost:29492/csapp.c
+GET /csapp.c HTTP/1.0
+uri: http://localhost:1725/nop-file.txt
+GET /nop-file.txt HTTP/1.0
+uri: http://localhost:5052/tiny.c
+GET /tiny.c HTTP/1.0
+uri: http://localhost:5052/home.html
+GET /home.html HTTP/1.0
+uri: http://localhost:19651/home.html
+GET /home.html HTTP/1.0
+uri: http://localhost:19651/csapp.c
+GET /csapp.c HTTP/1.0
+uri: http://localhost:15845/home.html
+port: 
+GET /home.html HTTP/1.0
+uri: http://localhost:15845/csapp.c
+port: 
+GET /csapp.c HTTP/1.0
+uri: http://localhost:6248/nop-file.txt
+port: 
+GET /nop-file.txt HTTP/1.0
+uri: http://localhost:25724/tiny.c
+port: 
+GET /tiny.c HTTP/1.0
+uri: http://localhost:25724/home.html
+port: 
+GET /home.html HTTP/1.0
+uri: http://localhost:10446/home.html
+GET /home.html HTTP/1.0
+port: 10446
+uri: http://localhost:10446/csapp.c
+GET /csapp.c HTTP/1.0
+port: 10446
+uri: http://localhost:27867/home.html
+GET /home.html HTTP/1.0
+port: 27867
+uri: http://localhost:27867/csapp.c
+GET /csapp.c HTTP/1.0
+port: 27867
+uri: http://localhost:27219/nop-file.txt
+GET /nop-file.txt HTTP/1.0
+port: 27219
+uri: http://localhost:12930/tiny.c
+GET /tiny.c HTTP/1.0
+port: 12930
+uri: http://localhost:12930/home.html
+GET /home.html HTTP/1.0
+port: 12930
+uri: http://localhost:7770/home.html
+GET /home.html HTTP/1.0
+port: 7770
+uri: http://localhost:7770/csapp.c
+GET /csapp.c HTTP/1.0
+port: 7770
+uri: http://localhost:32297/nop-file.txt
+GET /nop-file.txt HTTP/1.0
+port: 32297
+uri: http://localhost:11049/home.html
+GET /home.html HTTP/1.0
+port: 11049
+uri: http://localhost:11049/csapp.c
+GET /csapp.c HTTP/1.0
+port: 11049
+uri: http://localhost:30774/home.html
+GET /home.html HTTP/1.0
+port: 30774
+uri: http://localhost:30774/csapp.c
+GET /csapp.c HTTP/1.0
+port: 30774
+uri: http://localhost:32651/nop-file.txt
+GET /nop-file.txt HTTP/1.0
+port: 32651
+uri: http://localhost:1359/tiny.c
+GET /tiny.c HTTP/1.0
+port: 1359
+uri: http://localhost:1359/home.html
+GET /home.html HTTP/1.0
+port: 1359
+uri: http://localhost:1942/home.html
+GET /home.html HTTP/1.0
+port: 1942
+uri: http://localhost:1942/csapp.c
+GET /csapp.c HTTP/1.0
+port: 1942
+uri: http://localhost:19119/home.html
+GET /home.html HTTP/1.0
+port: 19119
+uri: http://localhost:19119/csapp.c
+GET /csapp.c HTTP/1.0
+port: 19119
+uri: http://localhost:14285/nop-file.txt
+GET /nop-file.txt HTTP/1.0
+port: 14285
+uri: http://localhost:4994/home.html
+GET /home.html HTTP/1.0
+port: 4994
+uri: http://localhost:4994/csapp.c
+GET /csapp.c HTTP/1.0
+port: 4994
+uri: http://localhost:4994/tiny.c
+GET /tiny.c HTTP/1.0
+port: 4994
+uri: http://localhost:4994/godzilla.jpg
+GET /godzilla.jpg HTTP/1.0
+port: 4994
+uri: http://localhost:4994/tiny
+GET /tiny HTTP/1.0
+port: 4994
+uri: http://localhost:6317/nop-file.txt
+GET /nop-file.txt HTTP/1.0
+port: 6317
+uri: http://localhost:7099/tiny.c
+GET /tiny.c HTTP/1.0
+port: 7099
+uri: http://localhost:7099/home.html
+GET /home.html HTTP/1.0
+port: 7099
+uri: http://localhost:7099/csapp.c
+GET /csapp.c HTTP/1.0
+port: 7099
+uri: http://localhost:7099/home.html
+GET /home.html HTTP/1.0
+port: 7099
+uri: http://localhost:21055/home.html
+GET /home.html HTTP/1.0
+port: 21055
+uri: http://localhost:21055/csapp.c
+GET /csapp.c HTTP/1.0
+port: 21055
+uri: http://localhost:5476/nop-file.txt
+GET /nop-file.txt HTTP/1.0
+port: 5476
+uri: http://localhost:4754/tiny.c
+GET /tiny.c HTTP/1.0
+port: 4754
+uri: http://localhost:4754/home.html
+GET /home.html HTTP/1.0
+port: 4754
+uri: http://localhost:2646/csapp.c
+GET /csapp.c HTTP/1.0
+port: 2646
+uri: http://localhost:2646/home.html
+GET /home.html HTTP/1.0
+port: 2646
+uri: http://localhost:25223/tiny.c
+GET /tiny.c HTTP/1.0
+port: 25223
+uri: http://localhost:25223/home.html
+GET /home.html HTTP/1.0
+port: 25223
+uri: http://localhost:5581/nop-file.txt
+GET /nop-file.txt HTTP/1.0
+port: 5581
+uri: http://localhost:8997/tiny.c
+GET /tiny.c HTTP/1.0
+port: 8997
+uri: http://localhost:8997/home.html
+GET /home.html HTTP/1.0
+port: 8997
+uri: http://localhost:5697/tiny.c
+GET /tiny.c HTTP/1.0
+port: 5697
+uri: http://localhost:5697/home.html
+GET /home.html HTTP/1.0
+port: 5697
+uri: http://localhost:5697/csapp.c
+GET /csapp.c HTTP/1.0
+port: 5697
+uri: http://localhost:5697/godzilla.jpg
+GET /godzilla.jpg HTTP/1.0
+port: 5697
+uri: http://localhost:5697/tiny
+GET /tiny HTTP/1.0
+port: 5697
+uri: http://localhost:24089/nop-file.txt
+GET /nop-file.txt HTTP/1.0
+port: 24089
+uri: http://localhost:26193/tiny.c
+GET /tiny.c HTTP/1.0
+port: 26193
+uri: http://localhost:26193/home.html
+GET /home.html HTTP/1.0
+port: 26193
+uri: http://localhost:3862/tiny.c
+GET /tiny.c HTTP/1.0
+port: 3862
+uri: http://localhost:3862/home.html
+GET /home.html HTTP/1.0
+port: 3862
+uri: http://localhost:25347/home.html
+GET /home.html HTTP/1.0
+port: 25347
+uri: http://localhost:25347/csapp.c
+GET /csapp.c HTTP/1.0
+port: 25347
+uri: http://localhost:1536/godzilla.jpg
+GET /godzilla.jpg HTTP/1.0
+port: 1536
+uri: http://localhost:1536/home.html
+GET /home.html HTTP/1.0
+port: 1536
+uri: http://localhost:4620/home.html
+GET /home.html HTTP/1.0
+port: 4620
+uri: http://localhost:4620/csapp.c
+GET /csapp.c HTTP/1.0
+port: 4620
+uri: http://localhost:31348/nop-file.txt
+GET /nop-file.txt HTTP/1.0
+port: 31348
+uri: http://localhost:28846/tiny.c
+GET /tiny.c HTTP/1.0
+port: 28846
+uri: http://localhost:28846/home.html
+GET /home.html HTTP/1.0
+port: 28846
+uri: http://localhost:28579/home.html
+GET /home.html HTTP/1.0
+port: 28579
+uri: http://localhost:28579/csapp.c
+GET /csapp.c HTTP/1.0
+port: 28579
+uri: http://localhost:30295/home.html
+GET /home.html HTTP/1.0
+port: 30295
+uri: http://localhost:30295/csapp.c
+GET /csapp.c HTTP/1.0
+port: 30295
+uri: http://localhost:10459/nop-file.txt
+GET /nop-file.txt HTTP/1.0
+port: 10459
+uri: http://localhost:23575/tiny.c
+GET /tiny.c HTTP/1.0
+port: 23575
+uri: http://localhost:23575/home.html
+GET /home.html HTTP/1.0
+port: 23575
+uri: http://localhost:9775/home.html
+GET /home.html HTTP/1.0
+port: 9775
+uri: http://localhost:9775/csapp.c
+GET /csapp.c HTTP/1.0
+port: 9775
+uri: http://localhost:7065/home.html
+GET /home.html HTTP/1.0
+port: 7065
+uri: http://localhost:7065/csapp.c
+GET /csapp.c HTTP/1.0
+port: 7065
+uri: http://localhost:7669/nop-file.txt
+GET /nop-file.txt HTTP/1.0
+port: 7669
+uri: http://localhost:9175/tiny.c
+GET /tiny.c HTTP/1.0
+port: 9175
+uri: http://localhost:9175/home.html
+GET /home.html HTTP/1.0
+port: 9175
+uri: http://127.0.0.1.nip.io:32192/browser-testbench/index.html
+GET /browser-testbench/index.html HTTP/1.0
+port: 32192

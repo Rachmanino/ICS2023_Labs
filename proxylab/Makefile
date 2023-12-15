@@ -21,7 +21,7 @@ proxy: proxy.o csapp.o
 	$(CC) $(CFLAGS) proxy.o csapp.o -o proxy $(LDFLAGS)
 
 # Creates a tarball in ../proxylab-handin.tar that you should then
-# hand in to Autolab. DO NOT MODIFY THIS!
+# hand in to Autolab. DO NOT MODIFY THI
 handin:
 	(make clean; cd ..; tar czvf proxylab-handin.tar.gz proxylab-handout)
 

@@ -8,6 +8,6 @@
 - [x] archlab
 - [x] cachelab 
 - [x] tshlab 
-- [ ] malloclab ---Working...
-- [ ] proxylab
+- [x] malloclab(*Nasty!*)
+- [ ] proxylab ---Working...
    

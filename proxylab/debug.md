@@ -1,0 +1,3 @@
+- 错误点检查，对照[此博客](https://github.com/caolonghao/ICS-Labs/blob/master/ProxyLab/proxylab-handout/proxy.c)
+- strcpy -> memcpy ? 
+- 数据最优化

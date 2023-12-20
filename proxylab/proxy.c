@@ -3,6 +3,9 @@
 #include "csapp.h"
 #include "sbuf.h"
 
+#define NTHREADS 10
+#define SBUFSIZE 16
+
 /* Recommended max cache and object sizes */
 #define MAX_CACHE_SIZE 1049000
 #define MAX_OBJECT_SIZE 102400
@@ -18,14 +21,10 @@ struct Uri_info {
     char path[MAXLINE];
 };
 
-/* For debug use*/
-void debug_log (char* logging) {
-    // int fd = Open("proxy.log", "a");
-    // Rio_writen(fd, logging, strlen(logging));
-}
+/* Sbuf */
+sbuf_t sbuf;
 
 /* Cache structure */
-#define INF 0x3f3f3f3f
 #define MAX_CACHE_LINE  10 //Cache lines calculated manually
 
 typedef struct {
@@ -84,9 +83,9 @@ void write_cache(char* uri, char* object, int size) {
         }   
     }
     if (index == -1) {  // Miss!
-        int oldest = INF;
+        int oldest;
         for (int i = 0; i < MAX_CACHE_LINE; i++) {
-            if (cache.line[i].time < oldest) {
+            if (i == 0 || cache.line[i].time < oldest) {
                 index = i;  // Eviction(LRU)!
                 oldest = cache.line[i].time;
             }
@@ -107,33 +106,41 @@ void parse_uri(char *uri, struct Uri_info* uri_info);
 void doit(int fd);
 void* thread(void* vargp);
 
+void sigchld_handler(sig_t sig) {
+    int init_errno = errno;
+    while (waitpid(-1, NULL, WNOHANG) > 0);
+    errno = init_errno;
+}
 
 int main(int argc, char** argv)
 {
     Signal(SIGPIPE, SIG_IGN);
 
-    int listenfd, *connfdp;
+    int listenfd, connfd;
     socklen_t clientlen;
     struct sockaddr_storage clientaddr;
     char hostname[MAXLINE], port[MAXLINE];
     pthread_t tid;
 
     if (argc != 2) {
-        // fprintf(stderr, "usage: %s <port>\n", argv[0]);
+        fprintf(stderr, "usage: %s <port>\n", argv[0]);
         exit(1);
     }
 
     init_cache();
+  
+    sbuf_init(&sbuf, SBUFSIZE);
+    for (int i = 0; i < NTHREADS; i++) {
+        Pthread_create(&tid, NULL, thread, NULL);
+    }
 
     listenfd = Open_listenfd(argv[1]);
     while (1) {
         clientlen = sizeof(struct sockaddr_storage);
-        connfdp = Malloc(sizeof(int));
-        *connfdp = Accept(listenfd, (SA *)&clientaddr, &clientlen);
+        connfd = Accept(listenfd, (SA *)&clientaddr, &clientlen);
         Getnameinfo((SA *)&clientaddr, clientlen, hostname, MAXLINE,
                     port, MAXLINE, 0);
-        //printf("Accepted connection from (%s, %s)\n", hostname, port);
-        Pthread_create(&tid, NULL, thread, connfdp);
+        sbuf_insert(&sbuf, connfd);
     }
     return 0;
 }
@@ -142,12 +149,13 @@ int main(int argc, char** argv)
     Thread function: handle the request from the client and run doit() to work as a proxy
 */
 void* thread(void* vargp) {
-    int connfd = *((int*)vargp);
     Pthread_detach(pthread_self());
-    Free(vargp);
-    doit(connfd);
-    Close(connfd);
-    return NULL;
+    while (1) {
+        int connfd = sbuf_remove(&sbuf);
+        doit(connfd);
+        Close(connfd);
+        return NULL;
+    }
 }
 
 /*
@@ -160,7 +168,7 @@ void doit(int fd) {
 
     /* Read request line and headers */
     Rio_readinitb(&client_rio, fd);
-    Rio_readlineb(&client_rio, buf, MAXLINE);
+    if (!Rio_readlineb(&client_rio, buf, MAXLINE)) return;
 
     sscanf(buf, "%s %s %s", method, uri, version);
     strcpy(uri_backup, uri);

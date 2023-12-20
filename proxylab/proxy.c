@@ -17,9 +17,96 @@ struct Uri_info {
     char path[MAXLINE];
 };
 
+/* For debug use*/
+void debug_log (char* logging) {
+    // int fd = Open("proxy.log", "a");
+    // Rio_writen(fd, logging, strlen(logging));
+}
+
+/* Cache structure */
+#define INF 0x3f3f3f3f
+#define MAX_CACHE_LINE  10 //Cache lines calculated manually
+
+typedef struct {
+    char uri[MAXLINE];
+    char object[MAX_OBJECT_SIZE];
+    int size;
+    int valid;
+    int time;
+} Cache_Line;
+
+typedef struct {
+    Cache_Line line[MAX_CACHE_LINE];
+    int Time;   // current timestamp
+
+    /* Following values are for reader&writer model */ 
+    int readcnt;    // Initially = 0
+    sem_t mutex,    // Lock readcnt, initially = 1
+        w;          // Lock cache, initially = 1
+} Cache;
+Cache cache;
+
+/* Init a cache */
+void init_cache() {
+    cache.Time = 0;
+    cache.readcnt = 0;
+    Sem_init(&cache.mutex, 0, 1);
+    Sem_init(&cache.w, 0, 1);
+    for (int i = 0; i < MAX_CACHE_LINE; i++) {
+        cache.line[i].size = 0;
+        cache.line[i].time = 0;
+        cache.line[i].valid = 0;
+    }
+}
+
+/* Search for specific cache line based on given uri, 
+return the line index if found, otherwise -1 */
+int find_cache(char* uri) {
+    for (int i = 0; i < MAX_CACHE_LINE; i++) {
+        if (cache.line[i].valid && !strcmp(uri, cache.line[i].uri)) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+/* Modify data in cache (LRU policy, hit/miss/eviction),
+simply ignore too large object*/
+void write_cache(char* uri, char* object, int size) {
+    if (size > MAX_OBJECT_SIZE) return;
+    
+    int index = -1;  // the line to be modified
+    for (int i = 0; i < MAX_CACHE_LINE; i++) {
+        if (!cache.line[i].valid) {
+            index = i;  // Hit!
+            break;
+        }   
+    }
+    if (index == -1) {  // Miss!
+        int oldest = INF;
+        for (int i = 0; i < MAX_CACHE_LINE; i++) {
+            if (cache.line[i].time < oldest) {
+                index = i;  // Eviction(LRU)!
+                oldest = cache.line[i].time;
+            }
+        }
+    }
+
+    P(&cache.w);
+    strcpy(cache.line[index].object, object);
+    strcpy(cache.line[index].uri, uri);
+    cache.line[index].time = ++cache.Time;
+    cache.line[index].size = size;
+    cache.line[index].valid = 1;
+    V(&cache.w);
+}
+
+/* Functions for proxy */
 void parse_uri(char *uri, struct Uri_info* uri_info);
 void doit(int fd);
 void* thread(void* vargp);
+
+
 int main(int argc, char** argv)
 {
     Signal(SIGPIPE, SIG_IGN);
@@ -35,6 +122,8 @@ int main(int argc, char** argv)
         exit(1);
     }
 
+    init_cache();
+
     listenfd = Open_listenfd(argv[1]);
     while (1) {
         clientlen = sizeof(struct sockaddr_storage);
@@ -42,9 +131,8 @@ int main(int argc, char** argv)
         *connfdp = Accept(listenfd, (SA *)&clientaddr, &clientlen);
         Getnameinfo((SA *)&clientaddr, clientlen, hostname, MAXLINE,
                     port, MAXLINE, 0);
-        printf("Accepted connection from (%s, %s)\n", hostname, port);
+        //printf("Accepted connection from (%s, %s)\n", hostname, port);
         Pthread_create(&tid, NULL, thread, connfdp);
-        
     }
     return 0;
 }
@@ -65,7 +153,7 @@ void* thread(void* vargp) {
     Proxy function: handle the request from the client and forward to the server
 */
 void doit(int fd) {
-    char buf[MAXLINE], method[MAXLINE], uri[MAXLINE], version[MAXLINE];
+    char buf[MAXLINE], method[MAXLINE], uri[MAXLINE], uri_backup[MAXLINE], version[MAXLINE];
     char req_header_buf[MAXLINE], remain_buf[MAXLINE], tmp[MAXLINE];
     rio_t client_rio, server_rio;
 
@@ -74,9 +162,32 @@ void doit(int fd) {
     Rio_readlineb(&client_rio, buf, MAXLINE);
 
     sscanf(buf, "%s %s %s", method, uri, version);
+    strcpy(uri_backup, uri);
     if (strcmp(method, "GET")) {
         return;
     }
+
+    /* Determine whether object is in the cache */
+    int index = find_cache(uri);
+    if (index != -1) {
+        P(&cache.mutex);
+        cache.readcnt++;
+        if (cache.readcnt == 1) {
+            P(&cache.w);
+        }
+        V(&cache.mutex);
+
+        Rio_writen(fd, cache.line[index].object, cache.line[index].size);
+
+        P(&cache.mutex);
+        cache.readcnt--;
+        if (cache.readcnt == 0) {
+            V(&cache.w);
+        }
+        V(&cache.mutex);
+        return;
+    }
+
     struct Uri_info* uri_info = malloc(sizeof(struct Uri_info));
     parse_uri(uri, uri_info);
 
@@ -107,10 +218,18 @@ void doit(int fd) {
     Rio_writen(serverfd, req_header_buf, strlen(req_header_buf));
 
     /* Listen to server and forward response to client */
-    ssize_t n;
+    size_t n;
+    int cache_size = 0;
+    char cache_buf[MAX_OBJECT_SIZE];
+    int success = 0;
+    memset(cache_buf, 0, sizeof(cache_buf));
     while ((n = Rio_readlineb(&server_rio, buf, MAXLINE)) > 0 ) {
         Rio_writen(fd, buf, n);
+        strcat(cache_buf, buf);
+        cache_size += n;
     }
+    write_cache(uri_backup, cache_buf, cache_size);
+
     Free(uri_info);
     Close(serverfd);
 }

@@ -26,7 +26,7 @@ int sbuf_remove(sbuf_t* sp) {
     int item;
     P(&sp->items);
     P(&sp->mutex);
-    item = sp->buf[(++sp->front) % (sp->n)]
+    item = sp->buf[(++sp->front) % (sp->n)];
     V(&sp->mutex);
     V(&sp->slots);
     return item;

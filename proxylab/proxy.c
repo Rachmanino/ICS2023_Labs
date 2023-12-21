@@ -3,8 +3,8 @@
 #include "csapp.h"
 #include "sbuf.h"
 
-#define NTHREADS 10
-#define SBUFSIZE 16
+#define NTHREADS 16
+#define SBUFSIZE 32
 
 /* Recommended max cache and object sizes */
 #define MAX_CACHE_SIZE 1049000
@@ -13,7 +13,7 @@
 #define DEBUG
 
 /* You won't lose style points for including this long line in your code */
-static const char *user_agent_hdr = "User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:10.0.3) Gecko/20120305 Firefox/10.0.3\r\n";
+static const char* user_agent_hdr = "User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:10.0.3) Gecko/20120305 Firefox/10.0.3\r\n";
 
 struct Uri_info {
     char host[MAXLINE];
@@ -39,7 +39,7 @@ typedef struct {
     Cache_Line line[MAX_CACHE_LINE];
     int Time;   // current timestamp
 
-    /* Following values are for reader&writer model */ 
+    /* Following values are for reader&writer model */
     int readcnt;    // Initially = 0
     sem_t mutex,    // Lock readcnt, initially = 1
         w;          // Lock cache, initially = 1
@@ -59,7 +59,7 @@ void init_cache() {
     }
 }
 
-/* Search for specific cache line based on given uri, 
+/* Search for specific cache line based on given uri,
 return the line index if found, otherwise -1 */
 int find_cache(char* uri) {
     for (int i = 0; i < MAX_CACHE_LINE; i++) {
@@ -74,13 +74,13 @@ int find_cache(char* uri) {
 simply ignore too large object*/
 void write_cache(char* uri, char* object, int size) {
     if (size > MAX_OBJECT_SIZE) return;
-    
+
     int index = -1;  // the line to be modified
     for (int i = 0; i < MAX_CACHE_LINE; i++) {
         if (!cache.line[i].valid) {
             index = i;  // Hit!
             break;
-        }   
+        }
     }
     if (index == -1) {  // Miss!
         int oldest;
@@ -93,7 +93,7 @@ void write_cache(char* uri, char* object, int size) {
     }
 
     P(&cache.w);
-    strcpy(cache.line[index].object, object);
+    memcpy(cache.line[index].object, object, size);
     strcpy(cache.line[index].uri, uri);
     cache.line[index].time = ++cache.Time;
     cache.line[index].size = size;
@@ -102,18 +102,11 @@ void write_cache(char* uri, char* object, int size) {
 }
 
 /* Functions for proxy */
-void parse_uri(char *uri, struct Uri_info* uri_info);
+void parse_uri(char* uri, struct Uri_info* uri_info);
 void doit(int fd);
 void* thread(void* vargp);
 
-void sigchld_handler(sig_t sig) {
-    int init_errno = errno;
-    while (waitpid(-1, NULL, WNOHANG) > 0);
-    errno = init_errno;
-}
-
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
     Signal(SIGPIPE, SIG_IGN);
 
     int listenfd, connfd;
@@ -128,18 +121,18 @@ int main(int argc, char** argv)
     }
 
     init_cache();
-  
+
+    listenfd = Open_listenfd(argv[1]);
     sbuf_init(&sbuf, SBUFSIZE);
     for (int i = 0; i < NTHREADS; i++) {
         Pthread_create(&tid, NULL, thread, NULL);
     }
 
-    listenfd = Open_listenfd(argv[1]);
     while (1) {
         clientlen = sizeof(struct sockaddr_storage);
-        connfd = Accept(listenfd, (SA *)&clientaddr, &clientlen);
-        Getnameinfo((SA *)&clientaddr, clientlen, hostname, MAXLINE,
-                    port, MAXLINE, 0);
+        connfd = Accept(listenfd, (SA*)&clientaddr, &clientlen);
+        Getnameinfo((SA*)&clientaddr, clientlen, hostname, MAXLINE,
+            port, MAXLINE, 0);
         sbuf_insert(&sbuf, connfd);
     }
     return 0;
@@ -168,7 +161,9 @@ void doit(int fd) {
 
     /* Read request line and headers */
     Rio_readinitb(&client_rio, fd);
-    if (!Rio_readlineb(&client_rio, buf, MAXLINE)) return;
+    if (!Rio_readlineb(&client_rio, buf, MAXLINE)) {
+        return;
+    }
 
     sscanf(buf, "%s %s %s", method, uri, version);
     strcpy(uri_backup, uri);
@@ -203,10 +198,10 @@ void doit(int fd) {
     /* Read the remain request header */
     Rio_readlineb(&client_rio, tmp, MAXLINE);
     while (strcmp(tmp, "\r\n")) {
-        if (strncmp(tmp, "Host", strlen("Host")) == 0 
-        || strncmp(tmp, "User-Agent", strlen("User-Agent")) == 0
-        || strncmp(tmp, "Connection", strlen("Connection")) == 0
-        || strncmp(tmp, "Proxy-Connection", strlen("Proxy-Connection")) == 0) {
+        if (strncmp(tmp, "Host", strlen("Host")) == 0
+            || strncmp(tmp, "User-Agent", strlen("User-Agent")) == 0
+            || strncmp(tmp, "Connection", strlen("Connection")) == 0
+            || strncmp(tmp, "Proxy-Connection", strlen("Proxy-Connection")) == 0) {
             Rio_readlineb(&client_rio, tmp, MAXLINE);
             continue;
         }
@@ -232,9 +227,11 @@ void doit(int fd) {
     char cache_buf[MAX_OBJECT_SIZE];
     int success = 0;
     memset(cache_buf, 0, sizeof(cache_buf));
-    while ((n = Rio_readlineb(&server_rio, buf, MAXLINE)) > 0 ) {
+    while ((n = Rio_readlineb(&server_rio, buf, MAXLINE)) > 0) {
         Rio_writen(fd, buf, n);
-        strcat(cache_buf, buf);
+        if (cache_size + n < MAX_OBJECT_SIZE) {
+            memcpy(cache_buf + cache_size, buf, n);
+        }
         cache_size += n;
     }
     write_cache(uri_backup, cache_buf, cache_size);
@@ -245,17 +242,17 @@ void doit(int fd) {
 
 void parse_uri(char* uri, struct Uri_info* uri_info) {
     /* uri format is https://www.cmu.edu(:8080)/index.html */
-    char* trunkpos = strstr(uri, "//"); 
+    char* trunkpos = strstr(uri, "//");
     char* hostpos = trunkpos + 2;
     char* pathpos = strstr(hostpos, "/");
     char* portpos = strstr(hostpos, ":");
     if (portpos == NULL) {
-        sscanf(pathpos, "%s", uri_info->path); 
+        sscanf(pathpos, "%s", uri_info->path);
         strcpy(uri_info->port, "80");
         *pathpos = '\0';
     } else {
         int portNum;
-        sscanf(portpos+1, "%d%s", &portNum, uri_info->path);
+        sscanf(portpos + 1, "%d%s", &portNum, uri_info->path);
         sprintf(uri_info->port, "%d", portNum);
         *portpos = '\0';
     }

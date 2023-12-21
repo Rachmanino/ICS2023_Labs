@@ -26,7 +26,7 @@ proxy: proxy.o csapp.o sbuf.o
 # Creates a tarball in ../proxylab-handin.tar that you should then
 # hand in to Autolab. DO NOT MODIFY THI
 handin:
-	(make clean; cd ..; tar czvf proxylab-handin.tar.gz proxylab; mv proxylab-handin.tar.gz proxylab)
+	(make clean; cd ..; tar czvf proxylab-handin.tar.gz proxylab)
 
 clean:
 	rm -f *~ *.o proxy core *.tar *.zip *.gzip *.bzip *.gz

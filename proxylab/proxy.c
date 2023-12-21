@@ -1,3 +1,8 @@
+/*
+    Student ID: 吴童
+    Name: 2200013212
+*/
+
 #include <stdio.h>
 #include <strings.h>
 #include "csapp.h"
@@ -33,29 +38,30 @@ typedef struct {
     int size;
     int valid;
     int time;
-} Cache_Line;
-
-typedef struct {
-    Cache_Line line[MAX_CACHE_LINE];
-    int Time;   // current timestamp
 
     /* Following values are for reader&writer model */
     int readcnt;    // Initially = 0
     sem_t mutex,    // Lock readcnt, initially = 1
         w;          // Lock cache, initially = 1
+} Cache_Line;
+
+typedef struct {
+    Cache_Line line[MAX_CACHE_LINE];
+    int Time;   // current timestamp
 } Cache;
 Cache cache;
 
 /* Init a cache */
 void init_cache() {
     cache.Time = 0;
-    cache.readcnt = 0;
-    Sem_init(&cache.mutex, 0, 1);
-    Sem_init(&cache.w, 0, 1);
     for (int i = 0; i < MAX_CACHE_LINE; i++) {
         cache.line[i].size = 0;
         cache.line[i].time = 0;
         cache.line[i].valid = 0;
+
+        cache.line[i].readcnt = 0;
+        Sem_init(&cache.line[i].mutex, 0, 1);
+        Sem_init(&cache.line[i].w, 0, 1);
     }
 }
 
@@ -92,13 +98,13 @@ void write_cache(char* uri, char* object, int size) {
         }
     }
 
-    P(&cache.w);
+    P(&cache.line[index].w);
     memcpy(cache.line[index].object, object, size);
     strcpy(cache.line[index].uri, uri);
     cache.line[index].time = ++cache.Time;
     cache.line[index].size = size;
     cache.line[index].valid = 1;
-    V(&cache.w);
+    V(&cache.line[index].w);
 }
 
 /* Functions for proxy */
@@ -147,7 +153,6 @@ void* thread(void* vargp) {
         int connfd = sbuf_remove(&sbuf);
         doit(connfd);
         Close(connfd);
-        return NULL;
     }
 }
 
@@ -174,25 +179,25 @@ void doit(int fd) {
     /* Determine whether object is in the cache */
     int index = find_cache(uri);
     if (index != -1) {
-        P(&cache.mutex);
-        cache.readcnt++;
-        if (cache.readcnt == 1) {
-            P(&cache.w);
+        P(&cache.line[index].mutex);
+        cache.line[index].readcnt++;
+        if (cache.line[index].readcnt == 1) {
+            P(&cache.line[index].w);
         }
-        V(&cache.mutex);
+        V(&cache.line[index].mutex);
 
         Rio_writen(fd, cache.line[index].object, cache.line[index].size);
 
-        P(&cache.mutex);
-        cache.readcnt--;
-        if (cache.readcnt == 0) {
-            V(&cache.w);
+        P(&cache.line[index].mutex);
+        cache.line[index].readcnt--;
+        if (cache.line[index].readcnt == 0) {
+            V(&cache.line[index].w);
         }
-        V(&cache.mutex);
+        V(&cache.line[index].mutex);
         return;
     }
 
-    struct Uri_info* uri_info = malloc(sizeof(struct Uri_info));
+    struct Uri_info* uri_info = Malloc(sizeof(struct Uri_info));
     parse_uri(uri, uri_info);
 
     /* Read the remain request header */
@@ -225,9 +230,8 @@ void doit(int fd) {
     size_t n;
     int cache_size = 0;
     char cache_buf[MAX_OBJECT_SIZE];
-    int success = 0;
     memset(cache_buf, 0, sizeof(cache_buf));
-    while ((n = Rio_readlineb(&server_rio, buf, MAXLINE)) > 0) {
+    while ((n = rio_readlineb(&server_rio, buf, MAXLINE)) > 0) {
         Rio_writen(fd, buf, n);
         if (cache_size + n < MAX_OBJECT_SIZE) {
             memcpy(cache_buf + cache_size, buf, n);
@@ -239,7 +243,9 @@ void doit(int fd) {
     Free(uri_info);
     Close(serverfd);
 }
-
+/*
+    Parse the uri to get (host, port, path)
+*/
 void parse_uri(char* uri, struct Uri_info* uri_info) {
     /* uri format is https://www.cmu.edu(:8080)/index.html */
     char* trunkpos = strstr(uri, "//");

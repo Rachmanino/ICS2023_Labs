@@ -9,5 +9,7 @@
 - [x] cachelab 
 - [x] tshlab 
 - [x] malloclab(*Nasty!*)
-- [ ] proxylab ---Working...
+- [x] proxylab
+
+**All 8 labs are completed!**
    
